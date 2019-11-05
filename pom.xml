@@ -11,7 +11,7 @@
         <module>jackson</module>
     </modules>
     <properties>
-        <antlr4.version>4.3</antlr4.version>
+        <antlr4.version>4.7.2</antlr4.version>
         <guava.version>18.0</guava.version>
         <jsr305.version>3.0.0</jsr305.version>
         <gpg.sign.skip>false</gpg.sign.skip>
