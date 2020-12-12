@@ -102,7 +102,7 @@
 
 
     <properties>
-        <servlet.version>3.1.0</servlet.version>
+        <servlet.version>4.0.1</servlet.version>
         <jackson.version>2.9.10.5</jackson.version>
     </properties>
 
