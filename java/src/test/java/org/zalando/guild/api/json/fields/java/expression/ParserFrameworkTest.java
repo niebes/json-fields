@@ -87,7 +87,7 @@ public class ParserFrameworkTest {
             @Override
             protected boolean matchesSafely(final String item) {
                 final FieldPredicate fieldPredicate = ParserFramework.parseFieldsExpression(item);
-                return fieldPredicate.apply(fields);
+                return fieldPredicate.test(fields);
             }
 
             @Override

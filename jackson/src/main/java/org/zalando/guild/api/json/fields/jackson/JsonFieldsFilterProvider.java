@@ -91,7 +91,7 @@ public final class JsonFieldsFilterProvider extends SimpleFilterProvider {
 
             final String name = writer.getName();
             final FieldPredicate fieldPredicate = predicateSupplier.get();
-            if (fieldPredicate.apply(qualifiedPath(name))) {
+            if (fieldPredicate.test(qualifiedPath(name))) {
                 contextProvider.pushContext(name);
                 try {
                     delegate.serializeAsField(pojo, jgen, prov, writer);

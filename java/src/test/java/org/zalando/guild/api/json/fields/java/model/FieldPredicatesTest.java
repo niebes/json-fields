@@ -38,7 +38,7 @@ public class FieldPredicatesTest {
         return new TypeSafeMatcher<FieldPredicate>() {
             @Override
             protected boolean matchesSafely(final FieldPredicate item) {
-                return item.apply(tokens);
+                return item.test(tokens);
             }
 
             @Override
