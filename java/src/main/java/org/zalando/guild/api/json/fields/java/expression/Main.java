@@ -28,6 +28,6 @@ public final class Main {
         final List<String> fields = asList(args).subList(1, args.length);
         out.println("Generated predicate:     " + fieldPredicate);
         out.println("Field hierarchy to test: " + fields);
-        out.println("Result:                  " + fieldPredicate.apply(fields));
+        out.println("Result:                  " + fieldPredicate.test(fields));
     }
 }

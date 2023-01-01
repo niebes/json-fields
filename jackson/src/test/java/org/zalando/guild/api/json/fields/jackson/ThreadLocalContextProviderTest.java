@@ -5,7 +5,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 import static org.hamcrest.core.Is.is;
 
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,7 +42,7 @@ public class ThreadLocalContextProviderTest {
             }
 
             private void doRun() {
-                final ContextProvider contextProvider = ThreadLocalContextProvider.getInstance();
+                final ContextProvider contextProvider = ThreadLocalContextProvider.Companion.getInstance();
                 contextProvider.pushContext("foo");
                 contextProvider.pushContext("notfoo");
                 contextProvider.popContext();

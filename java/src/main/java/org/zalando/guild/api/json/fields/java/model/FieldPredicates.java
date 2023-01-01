@@ -93,13 +93,13 @@ public final class FieldPredicates {
         }
 
         @Override
-        public boolean apply(@Nonnull final List<String> tokens) {
-            if (!first.apply(tokens)) {
+        public boolean test(@Nonnull final List<String> tokens) {
+            if (!first.test(tokens)) {
                 return false;
             }
 
             for (final FieldPredicate predicate : more) {
-                if (!predicate.apply(tokens)) {
+                if (!predicate.test(tokens)) {
                     return false;
                 }
             }
@@ -127,8 +127,8 @@ public final class FieldPredicates {
         }
 
         @Override
-        public boolean apply(@Nonnull final List<String> tokens) {
-            return !negatee.apply(tokens);
+        public boolean test(@Nonnull final List<String> tokens) {
+            return !negatee.test(tokens);
         }
 
         @Override
@@ -147,13 +147,13 @@ public final class FieldPredicates {
         }
 
         @Override
-        public boolean apply(@Nonnull final List<String> tokens) {
-            if (first.apply(tokens)) {
+        public boolean test(@Nonnull final List<String> tokens) {
+            if (first.test(tokens)) {
                 return true;
             }
 
             for (final FieldPredicate predicate : more) {
-                if (predicate.apply(tokens)) {
+                if (predicate.test(tokens)) {
                     return true;
                 }
             }
@@ -175,7 +175,7 @@ public final class FieldPredicates {
 
     private static class AlwaysFalsePredicate implements FieldPredicate {
         @Override
-        public boolean apply(@Nonnull final List<String> tokens) {
+        public boolean test(@Nonnull final List<String> tokens) {
             return false;
         }
 
@@ -187,7 +187,7 @@ public final class FieldPredicates {
 
     private static class AlwaysTruePredicate implements FieldPredicate {
         @Override
-        public boolean apply(@Nonnull final List<String> tokens) {
+        public boolean test(@Nonnull final List<String> tokens) {
             return true;
         }
 
@@ -207,7 +207,7 @@ public final class FieldPredicates {
         }
 
         @Override
-        public boolean apply(@Nonnull final List<String> tokens) {
+        public boolean test(@Nonnull final List<String> tokens) {
             return tokens.size() <= index || tokens.get(index).equals(token);
         }
 

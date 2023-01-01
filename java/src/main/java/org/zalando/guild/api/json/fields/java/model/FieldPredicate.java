@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import com.google.common.base.Predicate;
+import java.util.function.Predicate;
 
 /**
  * The core abstraction for matching a hierarchy of fields. Based on this, a hierarchy of fields can be tested against a
@@ -27,5 +27,5 @@ public interface FieldPredicate extends Predicate<List<String>> {
      * @exception  NullPointerException      if the supplied list is {@code null} or contains {@code null} values
      * @exception  IllegalArgumentException  if the supplied list is empty
      */
-    boolean apply(@Nonnull List<String> fieldHierarchy);
+    boolean test(@Nonnull List<String> fieldHierarchy);
 }
