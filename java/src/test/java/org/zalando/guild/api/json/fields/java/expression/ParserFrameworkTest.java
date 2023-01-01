@@ -5,7 +5,7 @@ import static java.util.Collections.singletonList;
 
 import static org.hamcrest.core.IsNot.not;
 
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;

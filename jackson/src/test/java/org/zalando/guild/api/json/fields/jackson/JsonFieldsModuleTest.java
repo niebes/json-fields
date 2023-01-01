@@ -13,6 +13,7 @@ import org.zalando.guild.api.json.fields.java.model.FieldPredicate;
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -80,6 +81,7 @@ public class JsonFieldsModuleTest {
     private JsonAsserter asserterFor(final Object obj) {
         try {
             final String json = objectMapper.writeValueAsString(obj);
+            System.out.println(json);
             return getJsonAsserter(json);
         } catch (JsonProcessingException e) {
             throw new AssertionError(e);
@@ -95,18 +97,21 @@ public class JsonFieldsModuleTest {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         final Class<?>[] interfaces = {JsonAsserter.class};
         final AtomicReference<JsonAsserter> asserterHolder = new AtomicReference<>();
-        final InvocationHandler invocationHandler = (proxy, method, args) -> {
-            try {
-                method.invoke(delegate, args);
-            } catch (InvocationTargetException e) {
-                final Throwable cause = e.getCause();
-                if (cause instanceof AssertionError) {
-                    throw cause;
+        final InvocationHandler invocationHandler = new InvocationHandler() {
+            @Override
+            public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+                try {
+                    method.invoke(delegate, args);
+                } catch (InvocationTargetException e) {
+                    final Throwable cause = e.getCause();
+                    if (cause instanceof AssertionError) {
+                        throw cause;
+                    }
                 }
-            }
 
-            // all methods are fluid, so always return the proxy instance.
-            return asserterHolder.get();
+                // all methods are fluid, so always return the proxy instance.
+                return asserterHolder.get();
+            }
         };
 
         final JsonAsserter jsonAsserter = (JsonAsserter) newProxyInstance(classLoader, interfaces, invocationHandler);

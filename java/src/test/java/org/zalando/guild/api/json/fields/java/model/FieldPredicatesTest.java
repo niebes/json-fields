@@ -2,7 +2,7 @@ package org.zalando.guild.api.json.fields.java.model;
 
 import static java.util.Arrays.asList;
 
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.alwaysFalse;
 import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.alwaysTrue;
