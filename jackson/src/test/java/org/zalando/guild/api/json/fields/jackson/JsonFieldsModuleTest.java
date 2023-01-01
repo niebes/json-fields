@@ -81,7 +81,6 @@ public class JsonFieldsModuleTest {
     private JsonAsserter asserterFor(final Object obj) {
         try {
             final String json = objectMapper.writeValueAsString(obj);
-            System.out.println(json);
             return getJsonAsserter(json);
         } catch (JsonProcessingException e) {
             throw new AssertionError(e);
