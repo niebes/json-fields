@@ -1,17 +1,15 @@
 package org.zalando.guild.api.json.fields.jackson;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import javax.annotation.Nonnull;
-
-import org.zalando.guild.api.json.fields.jackson.generated.PackageVersion;
-import org.zalando.guild.api.json.fields.java.model.FieldPredicate;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
+import org.zalando.guild.api.json.fields.jackson.generated.PackageVersion;
+import org.zalando.guild.api.json.fields.java.model.FieldPredicate;
 
-import com.google.common.base.Supplier;
+import javax.annotation.Nonnull;
+import java.util.function.Supplier;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Module that will enable field-based filtering.
@@ -22,7 +20,7 @@ import com.google.common.base.Supplier;
 public class JsonFieldsModule extends SimpleModule {
 
     private static final long serialVersionUID = 7598419837008787123L;
-    private JsonFieldsAnnotationIntrospector jsonFieldsAnnotationIntrospector;
+    private final JsonFieldsAnnotationIntrospector jsonFieldsAnnotationIntrospector;
 
     /**
      * Instantiate the module with a custom subclass of JsonFieldsAnnotationIntrospector.
