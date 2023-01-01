@@ -125,13 +125,9 @@ class JsonFieldsModuleTest {
         }
 
         private fun doRun() {
-            println("allFieldsEnabled")
             allFieldsEnabled()
-            println("noFieldsEnabled")
             noFieldsEnabled()
-            println("simpleMatch")
             simpleMatch()
-            println("complicatedMatch")
             complicatedMatch()
             runs.incrementAndGet()
         }
