@@ -1,89 +1,66 @@
-package org.zalando.guild.api.json.fields.jackson;
+package org.zalando.guild.api.json.fields.jackson
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonassert.JsonAssert;
-import com.jayway.jsonassert.JsonAsserter;
-import org.junit.Before;
-import org.junit.Test;
-import org.zalando.guild.api.json.fields.java.model.FieldPredicate;
-
-import javax.annotation.Nonnull;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
-
-import static java.lang.reflect.Proxy.newProxyInstance;
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.*;
+import com.fasterxml.jackson.annotation.JsonAutoDetect
+import com.fasterxml.jackson.annotation.PropertyAccessor
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.jayway.jsonassert.JsonAssert
+import com.jayway.jsonassert.JsonAsserter
+import org.hamcrest.CoreMatchers
+import org.hamcrest.MatcherAssert
+import org.hamcrest.core.Is
+import org.junit.Before
+import org.junit.Test
+import org.zalando.guild.api.json.fields.java.model.FieldPredicate
+import org.zalando.guild.api.json.fields.java.model.FieldPredicates
+import java.lang.reflect.InvocationHandler
+import java.lang.reflect.InvocationTargetException
+import java.lang.reflect.Proxy
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
+import java.util.function.Supplier
 
 /**
  * @author Sean Patrick Floyd (sean.floyd@zalando.de)
  * @since 24.09.2015
  */
-public class JsonFieldsModuleTest {
-
-    private static final ThreadLocal<FieldPredicate> PREDICATE = new InheritableThreadLocal<>() {
-        @Override
-        protected FieldPredicate initialValue() {
-            return alwaysTrue();
-        }
-    };
-
-    private ObjectMapper objectMapper;
-    private final Outer outer = new Outer();
-    private final AtomicInteger runs = new AtomicInteger();
-
+class JsonFieldsModuleTest {
+    private var objectMapper: ObjectMapper? = null
+    private val outer = Outer()
+    private val runs = AtomicInteger()
     @Before
-    public void setUp() throws Exception {
-
-        objectMapper = new ObjectMapper();
-        objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
-
-        final Supplier<FieldPredicate> predicateSupplier = new Supplier<>() {
-            @Nonnull
-            @Override
-            public FieldPredicate get() {
-                return PREDICATE.get();
-            }
-        };
-
-        final ContextProvider contextProvider = ThreadLocalContextProvider.getInstance();
-        objectMapper.registerModule(JsonFieldsModule.createJsonFieldsModule(predicateSupplier, contextProvider));
+    @Throws(Exception::class)
+    fun setUp() {
+        objectMapper = ObjectMapper()
+        objectMapper!!.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+        val predicateSupplier = Supplier { PREDICATE.get() }
+        val contextProvider: ContextProvider = ThreadLocalContextProvider.instance
+        objectMapper!!.registerModule(JsonFieldsModule.createJsonFieldsModule(predicateSupplier, contextProvider))
     }
 
-    static class Outer {
-        private final Middle foo = new Middle();
-        private final String foo2 = "FOO2";
+    internal class Outer {
+        private val foo = Middle()
+        private val foo2 = "FOO2"
     }
 
-    static class Middle {
-        private final Inner bar = new Inner();
-        private final int bar2 = 123;
-
+    internal class Middle {
+        private val bar = Inner()
+        private val bar2 = 123
     }
 
-    static class Inner {
-        private final String baz = "BAZ";
-        private final boolean phleem = true;
+    internal class Inner {
+        private val baz = "BAZ"
+        private val phleem = true
     }
 
-    private JsonAsserter asserterFor(final Object obj) {
-        try {
-            final String json = objectMapper.writeValueAsString(obj);
-            return getJsonAsserter(json);
-        } catch (JsonProcessingException e) {
-            throw new AssertionError(e);
+    private fun asserterFor(obj: Any): JsonAsserter {
+        return try {
+            val json = objectMapper!!.writeValueAsString(obj)
+            getJsonAsserter(json)
+        } catch (e: JsonProcessingException) {
+            throw AssertionError(e)
         }
     }
 
@@ -91,116 +68,112 @@ public class JsonFieldsModuleTest {
      * Create a Proxy around JsonAsserter that rethrows AssertionError but filters out everything else. This is
      * necessary because otherwise JsonAsserter chokes on paths that go deeper than it can follow.
      */
-    private JsonAsserter getJsonAsserter(final String json) {
-        final JsonAsserter delegate = JsonAssert.with(json);
-        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        final Class<?>[] interfaces = {JsonAsserter.class};
-        final AtomicReference<JsonAsserter> asserterHolder = new AtomicReference<>();
-        final InvocationHandler invocationHandler = new InvocationHandler() {
-            @Override
-            public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-                try {
-                    method.invoke(delegate, args);
-                } catch (InvocationTargetException e) {
-                    final Throwable cause = e.getCause();
-                    if (cause instanceof AssertionError) {
-                        throw cause;
-                    }
+    private fun getJsonAsserter(json: String): JsonAsserter {
+        val delegate = JsonAssert.with(json)
+        val classLoader = Thread.currentThread().contextClassLoader
+        val interfaces = arrayOf<Class<*>>(JsonAsserter::class.java)
+        val asserterHolder = AtomicReference<JsonAsserter>()
+        val invocationHandler = InvocationHandler { proxy, method, args ->
+            try {
+                method.invoke(delegate, *args)
+            } catch (e: InvocationTargetException) {
+                val cause = e.cause
+                if (cause is AssertionError) {
+                    throw cause
                 }
-
-                // all methods are fluid, so always return the proxy instance.
-                return asserterHolder.get();
             }
-        };
 
-        final JsonAsserter jsonAsserter = (JsonAsserter) newProxyInstance(classLoader, interfaces, invocationHandler);
-        asserterHolder.set(jsonAsserter);
-        return jsonAsserter;
+            // all methods are fluid, so always return the proxy instance.
+            asserterHolder.get()
+        }
+        val jsonAsserter = Proxy.newProxyInstance(classLoader, interfaces, invocationHandler) as JsonAsserter
+        asserterHolder.set(jsonAsserter)
+        return jsonAsserter
     }
 
     @Test
-    public void singleThreadEnvironment() {
-        task(1000).run();
+    fun singleThreadEnvironment() {
+        task(1000).run()
     }
 
     @Test
-    public void multiThreadedEnvironment() throws InterruptedException {
-        final int threads = Runtime.getRuntime().availableProcessors() * 2;
-        final int runsPerThread = 100;
-        final int totalRuns = threads * runsPerThread;
-
-        runs.set(0);
-
-        final ExecutorService executorService = Executors.newFixedThreadPool(threads);
-        final Runnable task = task(runsPerThread);
-        for (int i = 0; i < threads; i++) {
-            executorService.submit(task);
+    @Throws(InterruptedException::class)
+    fun multiThreadedEnvironment() {
+        val threads = Runtime.getRuntime().availableProcessors() * 2
+        val runsPerThread = 100
+        val totalRuns = threads * runsPerThread
+        runs.set(0)
+        val executorService = Executors.newFixedThreadPool(threads)
+        val task: Runnable = task(runsPerThread)
+        for (i in 0 until threads) {
+            executorService.submit(task)
         }
-
-        executorService.shutdown();
-        assertThat(executorService.awaitTermination(Long.MAX_VALUE, NANOSECONDS), is(true));
-        assertThat(runs.get(), is(totalRuns));
-
+        executorService.shutdown()
+        MatcherAssert.assertThat(executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS), Is.`is`(true))
+        MatcherAssert.assertThat(runs.get(), Is.`is`(totalRuns))
     }
 
-    private CountingRunner task(final int runsPerThread) {
-        return new CountingRunner(runsPerThread);
+    private fun task(runsPerThread: Int): CountingRunner {
+        return CountingRunner(runsPerThread)
     }
 
-    private class CountingRunner implements Runnable {
-
-        private final int runsPerThread;
-
-        public CountingRunner(final int runsPerThread) {
-            this.runsPerThread = runsPerThread;
-        }
-
-        @Override
-        public void run() {
-            for (int i = 0; i < runsPerThread; i++) {
-                doRun();
+    private inner class CountingRunner(private val runsPerThread: Int) : Runnable {
+        override fun run() {
+            for (i in 0 until runsPerThread) {
+                doRun()
             }
         }
 
-        private void doRun() {
-
-            allFieldsEnabled();
-            noFieldsEnabled();
-            simpleMatch();
-            complicatedMatch();
-
-            runs.incrementAndGet();
+        private fun doRun() {
+            println("allFieldsEnabled")
+            allFieldsEnabled()
+            println("noFieldsEnabled")
+            noFieldsEnabled()
+            println("simpleMatch")
+            simpleMatch()
+            println("complicatedMatch")
+            complicatedMatch()
+            runs.incrementAndGet()
         }
 
-        private void complicatedMatch() {
-            PREDICATE.set(and(not(matchIndex(1, "bar")),
-                    not(matchIndex(0, "foo2"))));
-            asserterFor(outer).assertThat("$.foo2", is(nullValue()))
-                    .assertThat("$.foo.bar", is(nullValue()))
-                    .assertThat("$.foo.bar2", is(123));
+        private fun complicatedMatch() {
+            PREDICATE.set(
+                FieldPredicates.and(
+                    FieldPredicates.not(FieldPredicates.matchIndex(1, "bar")),
+                    FieldPredicates.not(FieldPredicates.matchIndex(0, "foo2"))
+                )
+            ) //
+            asserterFor(outer).assertThat("$.foo2", Is.`is`(CoreMatchers.nullValue())) //
+                .assertThat("$.foo.bar", Is.`is`(CoreMatchers.nullValue())) //
+                .assertThat("$.foo.bar2", Is.`is`(124)) //
         }
 
-        private void simpleMatch() {
-            PREDICATE.set(matchIndex(1, "bar"));
-            asserterFor(outer).assertThat("$.foo2", is("FOO2"))
-                    .assertThat("$.foo.bar.baz", is("BAZ"))
-                    .assertThat("$.foo.bar2", is(nullValue()))
-                    .assertThat("$.foo.bar.phleem", is(true));
+        private fun simpleMatch() {
+            PREDICATE.set(FieldPredicates.matchIndex(1, "bar"))
+            asserterFor(outer).assertThat("$.foo2", Is.`is`("FOO2")) //
+                .assertThat("$.foo.bar.baz", Is.`is`("BAZ")) //
+                .assertThat("$.foo.bar2", Is.`is`(CoreMatchers.nullValue())) //
+                .assertThat("$.foo.bar.phleem", Is.`is`(true)) //
         }
 
-        private void noFieldsEnabled() {
-            PREDICATE.set(alwaysFalse());
-            asserterFor(outer).assertThat("$.foo", is(nullValue()))
-                    .assertThat("$.foo2", is(nullValue()));
+        private fun noFieldsEnabled() {
+            PREDICATE.set(FieldPredicates.alwaysFalse())
+            asserterFor(outer).assertThat("$.foo", Is.`is`(CoreMatchers.nullValue())) //
+                .assertThat("$.foo2", Is.`is`(CoreMatchers.nullValue())) //
         }
 
-        private void allFieldsEnabled() {
-            PREDICATE.set(alwaysTrue());
-            asserterFor(outer).assertThat("$.foo2", is("FOO2"))
-                    .assertThat("$.foo.bar.baz", is("BAZ"))
-                    .assertThat("$.foo.bar2", is(123))
-                    .assertThat("$.foo.bar.phleem", is(true));
+        private fun allFieldsEnabled() {
+            PREDICATE.set(FieldPredicates.alwaysTrue())
+            asserterFor(outer).assertThat("$.foo2", Is.`is`("FOO2")) //
+                .assertThat("$.foo.bar.baz", Is.`is`("BAZ")) //
+                .assertThat("$.foo.bar2", Is.`is`(123)) //
+                .assertThat("$.foo.bar.phleem", Is.`is`(true)) //
         }
+    }
 
+    companion object {
+        private val PREDICATE: ThreadLocal<FieldPredicate> = object : InheritableThreadLocal<FieldPredicate>() {
+            override fun initialValue(): FieldPredicate = FieldPredicates.alwaysTrue()
+        }
     }
 }

@@ -1,35 +1,27 @@
-package org.zalando.guild.api.json.fields.jackson;
-
-import java.util.List;
-
-import javax.annotation.Nonnull;
+package org.zalando.guild.api.json.fields.jackson
 
 /**
- * This abstraction holds the context for the fields hierarchy required by the {@link JsonFieldsFilterProvider}.
+ * This abstraction holds the context for the fields hierarchy required by the [JsonFieldsFilterProvider].
  *
  * @author  Sean Patrick Floyd (sean.floyd@zalando.de)
  * @since   23.09.2015
  */
-public interface ContextProvider {
+interface ContextProvider {
 
-    /**
-     * Return the current list of fields. This will usually be an unmodifiable list.
-     */
-    @Nonnull
-    List<String> getContext();
+    val context: List<String>
 
     /**
      * Add the supplied field name to the end of the context.
      */
-    void pushContext(@Nonnull String context);
+    fun pushContext(context: String?)
 
     /**
      * Remove the last element from the field context.
      */
-    void popContext();
+    fun popContext()
 
     /**
      * Clear the context.
      */
-    void clear();
+    fun clear()
 }

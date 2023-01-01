@@ -1,23 +1,18 @@
-package org.zalando.guild.api.json.fields.jackson;
+package org.zalando.guild.api.json.fields.jackson
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
-import com.fasterxml.jackson.databind.ser.PropertyFilter;
-import com.fasterxml.jackson.databind.ser.PropertyWriter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
-import org.zalando.guild.api.json.fields.java.model.FieldPredicate;
-
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.JsonMappingException
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor
+import com.fasterxml.jackson.databind.node.ObjectNode
+import com.fasterxml.jackson.databind.ser.BeanPropertyWriter
+import com.fasterxml.jackson.databind.ser.PropertyFilter
+import com.fasterxml.jackson.databind.ser.PropertyWriter
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
+import com.google.common.base.Preconditions
+import org.zalando.guild.api.json.fields.java.model.FieldPredicate
+import java.util.function.Supplier
 
 /**
  * A FilterProvider that always returns a filter, backed by a supplier of FieldPredicate.
@@ -25,106 +20,99 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author  Sean Patrick Floyd (sean.floyd@zalando.de)
  * @since   23.09.2015
  */
-public final class JsonFieldsFilterProvider extends SimpleFilterProvider {
+class JsonFieldsFilterProvider(
+   predicateSupplier: Supplier<FieldPredicate>,
+   contextProvider: ContextProvider
+) : SimpleFilterProvider() {
+    private val predicateSupplier: Supplier<FieldPredicate>
+    private val contextProvider: ContextProvider
 
-    public static final String FILTER_ID = FieldPredicatePropertyFilter.class.getName();
-
-    private static final long serialVersionUID = -1263420090088201679L;
-
-    private final Supplier<FieldPredicate> predicateSupplier;
-    private final ContextProvider contextProvider;
-
-    public JsonFieldsFilterProvider(@Nonnull final Supplier<FieldPredicate> predicateSupplier,
-            @Nonnull final ContextProvider contextProvider) {
-        this.predicateSupplier = checkNotNull(predicateSupplier, "PredicateProvider required");
-        this.contextProvider = checkNotNull(contextProvider, "ContextProvider required");
-        super.setFailOnUnknownId(false);
+    init {
+        this.predicateSupplier = Preconditions.checkNotNull(predicateSupplier, "PredicateProvider required")
+        this.contextProvider = Preconditions.checkNotNull(contextProvider, "ContextProvider required")
+        super.setFailOnUnknownId(false)
     }
 
-    private static final PropertyFilter INCLUDE_ALL = new SimpleBeanPropertyFilter() {
-        @Override
-        protected boolean include(final BeanPropertyWriter writer) {
-            return true;
-        }
-
-        @Override
-        protected boolean include(final PropertyWriter writer) {
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return "JsonFieldsFilterProvider.INCLUDE_ALL";
-        }
-    };
-
-    @Override
-    public SimpleFilterProvider setFailOnUnknownId(final boolean state) {
-        throw new UnsupportedOperationException();
+    override fun setFailOnUnknownId(state: Boolean): SimpleFilterProvider {
+        throw UnsupportedOperationException()
     }
 
-    @Override
-    public boolean willFailOnUnknownId() {
-        return false;
+    override fun willFailOnUnknownId(): Boolean {
+        return false
     }
 
-    @Override
-    public PropertyFilter findPropertyFilter(final Object filterId, final Object valueToFilter) {
-
-        final PropertyFilter propertyFilter = super.findPropertyFilter(filterId, valueToFilter);
-
-        return new FieldPredicatePropertyFilter(propertyFilter == null ? INCLUDE_ALL : propertyFilter);
+    override fun findPropertyFilter(filterId: Any, valueToFilter: Any): PropertyFilter {
+        val propertyFilter = super.findPropertyFilter(filterId, valueToFilter)
+        return FieldPredicatePropertyFilter(propertyFilter ?: INCLUDE_ALL)
     }
 
-    private class FieldPredicatePropertyFilter implements PropertyFilter {
-
-        private final PropertyFilter delegate;
-
-        public FieldPredicatePropertyFilter(final PropertyFilter delegate) {
-
-            this.delegate = delegate;
-        }
-
-        @Override
-        public void serializeAsField(final Object pojo, final JsonGenerator jgen, final SerializerProvider prov,
-                final PropertyWriter writer) throws Exception {
-
-            final String name = writer.getName();
-            final FieldPredicate fieldPredicate = predicateSupplier.get();
+    private inner class FieldPredicatePropertyFilter(private val delegate: PropertyFilter) : PropertyFilter {
+        @Throws(Exception::class)
+        override fun serializeAsField(
+            pojo: Any, jgen: JsonGenerator, prov: SerializerProvider,
+            writer: PropertyWriter
+        ) {
+            val name = writer.name
+            val fieldPredicate = predicateSupplier.get()
             if (fieldPredicate.test(qualifiedPath(name))) {
-                contextProvider.pushContext(name);
+                contextProvider.pushContext(name)
                 try {
-                    delegate.serializeAsField(pojo, jgen, prov, writer);
+                    delegate.serializeAsField(pojo, jgen, prov, writer)
                 } finally {
-                    contextProvider.popContext();
+                    contextProvider.popContext()
                 }
             }
         }
 
-        private List<String> qualifiedPath(final String path) {
-            final List<String> context = contextProvider.getContext();
-            final List<String> paths = new ArrayList<>(context.size() + 1);
-            paths.addAll(context);
-            paths.add(path);
-            return paths;
+        private fun qualifiedPath(path: String): List<String> {
+            val context = contextProvider.context
+            val paths: MutableList<String> = ArrayList(context.size + 1)
+            paths.addAll(context)
+            paths.add(path)
+            return paths
         }
 
-        @Override
-        public void serializeAsElement(final Object elementValue, final JsonGenerator jgen,
-                final SerializerProvider prov, final PropertyWriter writer) throws Exception {
-            delegate.serializeAsElement(elementValue, jgen, prov, writer);
+        @Throws(Exception::class)
+        override fun serializeAsElement(
+            elementValue: Any, jgen: JsonGenerator,
+            prov: SerializerProvider, writer: PropertyWriter
+        ) {
+            delegate.serializeAsElement(elementValue, jgen, prov, writer)
         }
 
-        @Override
-        public void depositSchemaProperty(final PropertyWriter writer, final ObjectNode propertiesNode,
-                final SerializerProvider provider) throws JsonMappingException {
-            delegate.depositSchemaProperty(writer, propertiesNode, provider);
+        @Throws(JsonMappingException::class)
+        override fun depositSchemaProperty(
+            writer: PropertyWriter, propertiesNode: ObjectNode,
+            provider: SerializerProvider
+        ) {
+            delegate.depositSchemaProperty(writer, propertiesNode, provider)
         }
 
-        @Override
-        public void depositSchemaProperty(final PropertyWriter writer, final JsonObjectFormatVisitor objectVisitor,
-                final SerializerProvider provider) throws JsonMappingException {
-            delegate.depositSchemaProperty(writer, objectVisitor, provider);
+        @Throws(JsonMappingException::class)
+        override fun depositSchemaProperty(
+            writer: PropertyWriter, objectVisitor: JsonObjectFormatVisitor,
+            provider: SerializerProvider
+        ) {
+            delegate.depositSchemaProperty(writer, objectVisitor, provider)
+        }
+    }
+
+    companion object {
+        @JvmField
+        val FILTER_ID: String = FieldPredicatePropertyFilter::class.java.name
+        private const val serialVersionUID = -1263420090088201679L
+        private val INCLUDE_ALL: PropertyFilter = object : SimpleBeanPropertyFilter() {
+            override fun include(writer: BeanPropertyWriter): Boolean {
+                return true
+            }
+
+            override fun include(writer: PropertyWriter): Boolean {
+                return true
+            }
+
+            override fun toString(): String {
+                return "JsonFieldsFilterProvider.INCLUDE_ALL"
+            }
         }
     }
 }
