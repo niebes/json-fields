@@ -4,12 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import javax.annotation.Nonnull;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate;
@@ -51,7 +46,7 @@ public final class ParserFramework {
         checkNotNull(fieldsExpression, "FieldsExpression required");
         try {
 
-            final JsonFieldsLexer lexer = new JsonFieldsLexer(new ANTLRInputStream(fieldsExpression));
+            final JsonFieldsLexer lexer = new JsonFieldsLexer(CharStreams.fromString(fieldsExpression));
             lexer.removeErrorListeners();
 
             lexer.addErrorListener(STRICT_LISTENER);
