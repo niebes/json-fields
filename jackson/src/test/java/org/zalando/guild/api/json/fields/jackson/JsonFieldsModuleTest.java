@@ -1,53 +1,38 @@
 package org.zalando.guild.api.json.fields.jackson;
 
-import static java.lang.reflect.Proxy.newProxyInstance;
-
-import static java.util.concurrent.TimeUnit.NANOSECONDS;
-
-import static org.hamcrest.CoreMatchers.nullValue;
-
-import static org.hamcrest.core.Is.is;
-
-import static org.junit.Assert.assertThat;
-
-import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.alwaysFalse;
-import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.alwaysTrue;
-import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.matchIndex;
-
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-
-import javax.annotation.Nonnull;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import org.zalando.guild.api.json.fields.java.model.FieldPredicate;
-import org.zalando.guild.api.json.fields.java.model.FieldPredicates;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import com.google.common.base.Supplier;
-
 import com.jayway.jsonassert.JsonAssert;
 import com.jayway.jsonassert.JsonAsserter;
+import org.junit.Before;
+import org.junit.Test;
+import org.zalando.guild.api.json.fields.java.model.FieldPredicate;
+
+import javax.annotation.Nonnull;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+
+import static java.lang.reflect.Proxy.newProxyInstance;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.*;
 
 /**
- * @author  Sean Patrick Floyd (sean.floyd@zalando.de)
- * @since   24.09.2015
+ * @author Sean Patrick Floyd (sean.floyd@zalando.de)
+ * @since 24.09.2015
  */
 public class JsonFieldsModuleTest {
 
-    private static final ThreadLocal<FieldPredicate> PREDICATE = new InheritableThreadLocal<FieldPredicate>() {
+    private static final ThreadLocal<FieldPredicate> PREDICATE = new InheritableThreadLocal<>() {
         @Override
         protected FieldPredicate initialValue() {
             return alwaysTrue();
@@ -64,7 +49,7 @@ public class JsonFieldsModuleTest {
         objectMapper = new ObjectMapper();
         objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
 
-        final Supplier<FieldPredicate> predicateSupplier = new Supplier<FieldPredicate>() {
+        final Supplier<FieldPredicate> predicateSupplier = new Supplier<>() {
             @Nonnull
             @Override
             public FieldPredicate get() {
@@ -110,21 +95,18 @@ public class JsonFieldsModuleTest {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         final Class<?>[] interfaces = {JsonAsserter.class};
         final AtomicReference<JsonAsserter> asserterHolder = new AtomicReference<>();
-        final InvocationHandler invocationHandler = new InvocationHandler() {
-            @Override
-            public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-                try {
-                    method.invoke(delegate, args);
-                } catch (InvocationTargetException e) {
-                    final Throwable cause = e.getCause();
-                    if (cause instanceof AssertionError) {
-                        throw cause;
-                    }
+        final InvocationHandler invocationHandler = (proxy, method, args) -> {
+            try {
+                method.invoke(delegate, args);
+            } catch (InvocationTargetException e) {
+                final Throwable cause = e.getCause();
+                if (cause instanceof AssertionError) {
+                    throw cause;
                 }
-
-                // all methods are fluid, so always return the proxy instance.
-                return asserterHolder.get();
             }
+
+            // all methods are fluid, so always return the proxy instance.
+            return asserterHolder.get();
         };
 
         final JsonAsserter jsonAsserter = (JsonAsserter) newProxyInstance(classLoader, interfaces, invocationHandler);
@@ -146,14 +128,13 @@ public class JsonFieldsModuleTest {
         runs.set(0);
 
         final ExecutorService executorService = Executors.newFixedThreadPool(threads);
-
         final Runnable task = task(runsPerThread);
         for (int i = 0; i < threads; i++) {
             executorService.submit(task);
         }
 
         executorService.shutdown();
-        executorService.awaitTermination(Long.MAX_VALUE, NANOSECONDS);
+        assertThat(executorService.awaitTermination(Long.MAX_VALUE, NANOSECONDS), is(true));
         assertThat(runs.get(), is(totalRuns));
 
     }
@@ -188,33 +169,33 @@ public class JsonFieldsModuleTest {
         }
 
         private void complicatedMatch() {
-            PREDICATE.set(FieldPredicates.and(FieldPredicates.not(matchIndex(1, "bar")),
-                    FieldPredicates.not(matchIndex(0, "foo2"))));       //
-            asserterFor(outer).assertThat("$.foo2", is(nullValue()))    //
-                              .assertThat("$.foo.bar", is(nullValue())) //
-                              .assertThat("$.foo.bar2", is(123));       //
+            PREDICATE.set(and(not(matchIndex(1, "bar")),
+                    not(matchIndex(0, "foo2"))));
+            asserterFor(outer).assertThat("$.foo2", is(nullValue()))
+                    .assertThat("$.foo.bar", is(nullValue()))
+                    .assertThat("$.foo.bar2", is(123));
         }
 
         private void simpleMatch() {
             PREDICATE.set(matchIndex(1, "bar"));
-            asserterFor(outer).assertThat("$.foo2", is("FOO2"))          //
-                              .assertThat("$.foo.bar.baz", is("BAZ"))    //
-                              .assertThat("$.foo.bar2", is(nullValue())) //
-                              .assertThat("$.foo.bar.phleem", is(true)); //
+            asserterFor(outer).assertThat("$.foo2", is("FOO2"))
+                    .assertThat("$.foo.bar.baz", is("BAZ"))
+                    .assertThat("$.foo.bar2", is(nullValue()))
+                    .assertThat("$.foo.bar.phleem", is(true));
         }
 
         private void noFieldsEnabled() {
             PREDICATE.set(alwaysFalse());
-            asserterFor(outer).assertThat("$.foo", is(nullValue()))   //
-                              .assertThat("$.foo2", is(nullValue())); //
+            asserterFor(outer).assertThat("$.foo", is(nullValue()))
+                    .assertThat("$.foo2", is(nullValue()));
         }
 
         private void allFieldsEnabled() {
             PREDICATE.set(alwaysTrue());
-            asserterFor(outer).assertThat("$.foo2", is("FOO2"))          //
-                              .assertThat("$.foo.bar.baz", is("BAZ"))    //
-                              .assertThat("$.foo.bar2", is(123))         //
-                              .assertThat("$.foo.bar.phleem", is(true)); //
+            asserterFor(outer).assertThat("$.foo2", is("FOO2"))
+                    .assertThat("$.foo.bar.baz", is("BAZ"))
+                    .assertThat("$.foo.bar2", is(123))
+                    .assertThat("$.foo.bar.phleem", is(true));
         }
 
     }
