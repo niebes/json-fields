@@ -13,7 +13,7 @@
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <antlr4.version>4.12.0</antlr4.version>
+        <antlr4.version>4.13.0</antlr4.version>
         <guava.version>23.0</guava.version>
         <jsr305.version>3.0.2</jsr305.version>
         <gpg.sign.skip>false</gpg.sign.skip>
