@@ -1,10 +1,7 @@
-package org.zalando.guild.api.json.fields.java.model;
+package org.zalando.guild.api.json.fields.java.model
 
-import java.util.List;
-
-import javax.annotation.Nonnull;
-
-import java.util.function.Predicate;
+import java.util.function.Predicate
+import javax.annotation.Nonnull
 
 /**
  * The core abstraction for matching a hierarchy of fields. Based on this, a hierarchy of fields can be tested against a
@@ -13,19 +10,20 @@ import java.util.function.Predicate;
  * @author  Sean Patrick Floyd (sean.floyd@zalando.de)
  * @since   20.08.2015
  */
-public interface FieldPredicate extends Predicate<List<String>> {
-
+interface FieldPredicate : Predicate<List<String>> {
     /**
-     * <p>Return true if the supplied field hierarchy should be rendered. A list of strings represents a hierarchy of
-     * objects, where each element is the parent element of the next. E.g. a list {@code ["foo", "bar", "baz"]} would
-     * map to a JSON object hierarchy like this: {@code {"foo":{"bar":{"baz":"some value"}}}}. I.e. a FieldPredicate
+     *
+     * Return true if the supplied field hierarchy should be rendered. A list of strings represents a hierarchy of
+     * objects, where each element is the parent element of the next. E.g. a list `["foo", "bar", "baz"]` would
+     * map to a JSON object hierarchy like this: `{"foo":{"bar":{"baz":"some value"}}}`. I.e. a FieldPredicate
      * matching this list would cause the "baz" field to be rendered.
      *
-     * <p>Implementations of this interface will not accept null values. They may throw {@link IllegalArgumentException}
+     *
+     * Implementations of this interface will not accept null values. They may throw [IllegalArgumentException]
      * when confronted with empty lists.
      *
-     * @exception  NullPointerException      if the supplied list is {@code null} or contains {@code null} values
+     * @exception  NullPointerException      if the supplied list is `null` or contains `null` values
      * @exception  IllegalArgumentException  if the supplied list is empty
      */
-    boolean test(@Nonnull List<String> fieldHierarchy);
+    override fun test(@Nonnull fieldHierarchy: List<String>): Boolean
 }

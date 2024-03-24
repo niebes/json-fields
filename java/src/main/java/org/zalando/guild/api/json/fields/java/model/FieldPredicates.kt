@@ -1,219 +1,175 @@
-package org.zalando.guild.api.json.fields.java.model;
+package org.zalando.guild.api.json.fields.java.model
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.util.Arrays;
-import java.util.List;
-
-import javax.annotation.Nonnull;
+import javax.annotation.Nonnull
 
 /**
- * Factory methods for constructing {@link FieldPredicate}s.
+ * Factory methods for constructing [FieldPredicate]s.
  *
  * @author  Sean Patrick Floyd (sean.floyd@zalando.de)
  * @since   20.08.2015
  */
-public final class FieldPredicates {
+object FieldPredicates {
+    private val ALWAYS_FALSE: FieldPredicate = AlwaysFalsePredicate()
 
-    private static final FieldPredicate ALWAYS_FALSE = new AlwaysFalsePredicate();
+    private val ALWAYS_TRUE: FieldPredicate = AlwaysTruePredicate()
 
-    private static final FieldPredicate ALWAYS_TRUE = new AlwaysTruePredicate();
-
-    private static final FieldPredicate[] EMPTY_PREDICATES_ARRAY = new FieldPredicate[0];
 
     /**
-     * Return a {@link FieldPredicate} that matches everything.
+     * Return a [FieldPredicate] that matches everything.
      */
+    @JvmStatic
     @Nonnull
-    public static FieldPredicate alwaysTrue() {
-        return ALWAYS_TRUE;
+    fun alwaysTrue(): FieldPredicate {
+        return ALWAYS_TRUE
     }
 
     /**
-     * Return a {@link FieldPredicate} that matches nothing.
+     * Return a [FieldPredicate] that matches nothing.
      */
+    @JvmStatic
     @Nonnull
-    public static FieldPredicate alwaysFalse() {
-        return ALWAYS_FALSE;
+    fun alwaysFalse(): FieldPredicate {
+        return ALWAYS_FALSE
     }
 
     /**
-     * Return a {@link FieldPredicate} that returns true if all of the supplied {@link FieldPredicate}s return true.
+     * Return a [FieldPredicate] that returns true if all of the supplied [FieldPredicate]s return true.
      */
+    @JvmStatic
     @Nonnull
-    public static FieldPredicate and(@Nonnull final FieldPredicate first, @Nonnull final FieldPredicate... more) {
-        checkNotNull(first, "First Predicate required");
-        checkNotNull(more, "More Predicates required");
-        return new AndPredicate(first, more);
-    }
+    fun and(
+        first: FieldPredicate,
+        vararg more: FieldPredicate
+    ): FieldPredicate = AndPredicate(first, *more)
 
     /**
-     * Return a {@link FieldPredicate} that returns true if at least one of the supplied {@link FieldPredicate}s return
+     * Return a [FieldPredicate] that returns true if at least one of the supplied [FieldPredicate]s return
      * true.
      */
-    public static FieldPredicate or(@Nonnull final FieldPredicate first, @Nonnull final FieldPredicate... more) {
-        checkNotNull(first, "First Predicate required");
-        checkNotNull(more, "More Predicates required");
-        return new OrPredicate(first, more);
-    }
+    @JvmStatic
+    fun or(
+        first: FieldPredicate,
+        vararg more: FieldPredicate
+    ): FieldPredicate = OrPredicate(first, *more)
 
     /**
-     * Return a {@link FieldPredicate} that inverts the matching of the supplied {@link FieldPredicate}.
+     * Return a [FieldPredicate] that inverts the matching of the supplied [FieldPredicate].
      */
-    public static FieldPredicate not(@Nonnull final FieldPredicate negatee) {
-        checkNotNull(negatee, "Negatee required");
-        return new NotPredicate(negatee);
-    }
+    @JvmStatic
+    fun not(
+        negatee: FieldPredicate
+    ): FieldPredicate = NotPredicate(negatee)
 
     /**
-     * Return a {@link FieldPredicate} that returns true if the field at the supplied offset {@link FieldPredicate}
+     * Return a [FieldPredicate] that returns true if the field at the supplied offset [FieldPredicate]
      * equals the supplied token (or if the list doesn't contain that many items).
      */
-    public static FieldPredicate matchIndex(final int index, @Nonnull final String token) {
-        checkNotNull(token, "Token required");
-        return new MatchIndexPredicate(index, token);
+    @JvmStatic
+    fun matchIndex(
+        index: Int,
+        token: String
+    ): FieldPredicate = MatchIndexPredicate(index, token)
 
-    }
 
-    private FieldPredicates() { }
+    private class AndPredicate(
+        private val first: FieldPredicate,
+        private vararg val more: FieldPredicate
+    ) : FieldPredicate {
 
-    private static FieldPredicate[] defensiveCopyOfPredicateArray(final FieldPredicate[] fieldPredicates) {
 
-        return fieldPredicates.length == 0 ? EMPTY_PREDICATES_ARRAY
-                                           : Arrays.copyOf(fieldPredicates, fieldPredicates.length);
-    }
-
-    private static class AndPredicate implements FieldPredicate {
-        private final FieldPredicate first;
-        private final FieldPredicate[] more;
-
-        public AndPredicate(final FieldPredicate first, final FieldPredicate... more) {
-            this.first = first;
-            this.more = defensiveCopyOfPredicateArray(more);
-        }
-
-        @Override
-        public boolean test(@Nonnull final List<String> tokens) {
-            if (!first.test(tokens)) {
-                return false;
+        override fun test(fieldHierarchy: List<String>): Boolean {
+            if (!first.test(fieldHierarchy)) {
+                return false
             }
 
-            for (final FieldPredicate predicate : more) {
-                if (!predicate.test(tokens)) {
-                    return false;
+            for (predicate in more) {
+                if (!predicate.test(fieldHierarchy)) {
+                    return false
                 }
             }
 
-            return true;
+            return true
         }
 
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("( ").append(first);
-            for (final FieldPredicate predicate : more) {
-                sb.append(" AND ").append(predicate);
+        override fun toString(): String {
+            val sb = StringBuilder()
+            sb.append("( ").append(first)
+            for (predicate in more) {
+                sb.append(" AND ").append(predicate)
             }
 
-            return sb.append(" )").toString();
+            return sb.append(" )").toString()
         }
     }
 
-    private static class NotPredicate implements FieldPredicate {
-        private final FieldPredicate negatee;
-
-        public NotPredicate(final FieldPredicate negatee) {
-            this.negatee = negatee;
+    private class NotPredicate(private val negatee: FieldPredicate) : FieldPredicate {
+        override fun test(fieldHierarchy: List<String>): Boolean {
+            return !negatee.test(fieldHierarchy)
         }
 
-        @Override
-        public boolean test(@Nonnull final List<String> tokens) {
-            return !negatee.test(tokens);
-        }
-
-        @Override
-        public String toString() {
-            return String.format("NOT ( %s )", negatee);
+        override fun toString(): String {
+            return String.format("NOT ( %s )", negatee)
         }
     }
 
-    private static class OrPredicate implements FieldPredicate {
-        private final FieldPredicate first;
-        private final FieldPredicate[] more;
+    private class OrPredicate(
+        private val first: FieldPredicate,
+        private vararg val more: FieldPredicate
+    ) : FieldPredicate {
 
-        public OrPredicate(final FieldPredicate first, final FieldPredicate... more) {
-            this.first = first;
-            this.more = defensiveCopyOfPredicateArray(more);
-        }
 
-        @Override
-        public boolean test(@Nonnull final List<String> tokens) {
-            if (first.test(tokens)) {
-                return true;
+        override fun test(fieldHierarchy: List<String>): Boolean {
+            if (first.test(fieldHierarchy)) {
+                return true
             }
 
-            for (final FieldPredicate predicate : more) {
-                if (predicate.test(tokens)) {
-                    return true;
+            for (predicate in more) {
+                if (predicate.test(fieldHierarchy)) {
+                    return true
                 }
             }
 
-            return false;
+            return false
         }
 
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("( ").append(first);
-            for (final FieldPredicate predicate : more) {
-                sb.append(" OR ").append(predicate);
+        override fun toString(): String {
+            val sb = StringBuilder()
+            sb.append("( ").append(first)
+            for (predicate in more) {
+                sb.append(" OR ").append(predicate)
             }
 
-            return sb.append(" )").toString();
+            return sb.append(" )").toString()
         }
     }
 
-    private static class AlwaysFalsePredicate implements FieldPredicate {
-        @Override
-        public boolean test(@Nonnull final List<String> tokens) {
-            return false;
+    private class AlwaysFalsePredicate : FieldPredicate {
+        override fun test(fieldHierarchy: List<String>): Boolean {
+            return false
         }
 
-        @Override
-        public String toString() {
-            return "false";
+        override fun toString(): String {
+            return "false"
         }
     }
 
-    private static class AlwaysTruePredicate implements FieldPredicate {
-        @Override
-        public boolean test(@Nonnull final List<String> tokens) {
-            return true;
+    private class AlwaysTruePredicate : FieldPredicate {
+        override fun test(fieldHierarchy: List<String>): Boolean {
+            return true
         }
 
-        @Override
-        public String toString() {
-            return "true";
+        override fun toString(): String {
+            return "true"
         }
     }
 
-    private static class MatchIndexPredicate implements FieldPredicate {
-        private final int index;
-        private final String token;
-
-        public MatchIndexPredicate(final int index, final String token) {
-            this.index = index;
-            this.token = token;
+    private class MatchIndexPredicate(private val index: Int, private val token: String) : FieldPredicate {
+        override fun test(fieldHierarchy: List<String>): Boolean {
+            return fieldHierarchy.size <= index || fieldHierarchy[index] == token
         }
 
-        @Override
-        public boolean test(@Nonnull final List<String> tokens) {
-            return tokens.size() <= index || tokens.get(index).equals(token);
-        }
-
-        @Override
-        public String toString() {
-            return String.format("match '%s' at index %d", token, index);
+        override fun toString(): String {
+            return String.format("match '%s' at index %d", token, index)
         }
     }
 }

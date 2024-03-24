@@ -1,89 +1,71 @@
-package org.zalando.guild.api.json.fields.java.expression;
+package org.zalando.guild.api.json.fields.java.expression
 
-import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.and;
-import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.matchIndex;
-import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.not;
-import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.or;
-
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.antlr.v4.runtime.misc.NotNull;
-
-import org.zalando.guild.api.json.fields.java.model.FieldPredicate;
-import org.zalando.guild.api.json.fields.java.parser.JsonFieldsBaseVisitor;
-import org.zalando.guild.api.json.fields.java.parser.JsonFieldsParser.FieldContext;
-import org.zalando.guild.api.json.fields.java.parser.JsonFieldsParser.Field_setContext;
-import org.zalando.guild.api.json.fields.java.parser.JsonFieldsParser.Fields_expressionContext;
-import org.zalando.guild.api.json.fields.java.parser.JsonFieldsParser.Json_fieldsContext;
-import org.zalando.guild.api.json.fields.java.parser.JsonFieldsParser.Qualified_fieldContext;
+import org.zalando.guild.api.json.fields.java.model.FieldPredicate
+import org.zalando.guild.api.json.fields.java.model.FieldPredicates.and
+import org.zalando.guild.api.json.fields.java.model.FieldPredicates.matchIndex
+import org.zalando.guild.api.json.fields.java.model.FieldPredicates.not
+import org.zalando.guild.api.json.fields.java.model.FieldPredicates.or
+import org.zalando.guild.api.json.fields.java.parser.JsonFieldsBaseVisitor
+import org.zalando.guild.api.json.fields.java.parser.JsonFieldsParser
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * A Visitor for parsing a JsonFields expression and turning it into a {@link FieldPredicate}.
+ * A Visitor for parsing a JsonFields expression and turning it into a [FieldPredicate].
  *
  * @author  Sean Patrick Floyd (sean.floyd@zalando.de)
  * @since   03.09.2015
  */
-class FieldPredicateVisitor extends JsonFieldsBaseVisitor<FieldPredicate> {
-
-    private final AtomicInteger depth = new AtomicInteger(0);
+internal class FieldPredicateVisitor : JsonFieldsBaseVisitor<FieldPredicate?>() {
+    private val depth = AtomicInteger(0)
 
     /**
      * This is the root entry point. It's just a pass-through to
-     * {@link #visitFields_expression (Fields_expressionContext)}.
+     * [(Fields_expressionContext)][.visitFields_expression].
      */
-    @Override
-    public FieldPredicate visitJson_fields(@NotNull final Json_fieldsContext ctx) {
-        return visitFields_expression(ctx.fields_expression());
+    override fun visitJson_fields(ctx: JsonFieldsParser.Json_fieldsContext): FieldPredicate {
+        return visitFields_expression(ctx.fields_expression())
     }
 
-    @Override
-    public FieldPredicate visitFields_expression(@NotNull final Fields_expressionContext ctx) {
-        final FieldPredicate predicate = visitField_set(ctx.field_set());
-        return ctx.negation() == null ? predicate : not(predicate);
+    override fun visitFields_expression(ctx: JsonFieldsParser.Fields_expressionContext): FieldPredicate {
+        val predicate = visitField_set(ctx.field_set())
+        return when {
+            ctx.negation() == null -> predicate
+            else -> not(predicate)
+        }
     }
 
-    @Override
-    public FieldPredicate visitField(@NotNull final FieldContext ctx) {
-        return matchIndex(depth.get(), ctx.getText());
+    override fun visitField(ctx: JsonFieldsParser.FieldContext): FieldPredicate {
+        return matchIndex(depth.get(), ctx.text)
     }
 
-    @Override
-    public FieldPredicate visitQualified_field(@NotNull final Qualified_fieldContext ctx) {
+    override fun visitQualified_field(ctx: JsonFieldsParser.Qualified_fieldContext): FieldPredicate {
+        val fieldPredicate = visitField(ctx.field())
 
-        final FieldPredicate fieldPredicate = visitField(ctx.field());
-
-        final Fields_expressionContext fieldsExpressionContext = ctx.fields_expression();
+        val fieldsExpressionContext = ctx.fields_expression()
 
         if (fieldsExpressionContext == null) {
-            return fieldPredicate;
+            return fieldPredicate
         } else {
-            depth.incrementAndGet();
+            depth.incrementAndGet()
 
-            final FieldPredicate result = and(fieldPredicate, visitFields_expression(fieldsExpressionContext));
-            depth.decrementAndGet();
-            return result;
+            val result = and(fieldPredicate, visitFields_expression(fieldsExpressionContext))
+            depth.decrementAndGet()
+            return result
         }
     }
 
-    @Override
-    public FieldPredicate visitField_set(@NotNull final Field_setContext ctx) {
+    override fun visitField_set(ctx: JsonFieldsParser.Field_setContext): FieldPredicate {
+        val fieldContexts = ctx.qualified_field()
+        val first = visitQualified_field(fieldContexts.first())
 
-        final List<Qualified_fieldContext> fieldContexts = ctx.qualified_field();
-        final FieldPredicate first = visitQualified_field(fieldContexts.get(0));
-        if (fieldContexts.size() == 1) {
-            return first;
+        if (fieldContexts.size == 1) {
+            return first
         }
 
-        final FieldPredicate[] more = new FieldPredicate[fieldContexts.size() - 1];
-        int offset = 0;
-
-        for (final Qualified_fieldContext qualified_fieldContext : fieldContexts.subList(1, fieldContexts.size())) {
-            more[offset++] = visitQualified_field(qualified_fieldContext);
+        val more = fieldContexts.drop(1).map {
+            visitQualified_field(it)
         }
 
-        return or(first, more);
-
+        return or(first, *more.toTypedArray())
     }
-
 }
