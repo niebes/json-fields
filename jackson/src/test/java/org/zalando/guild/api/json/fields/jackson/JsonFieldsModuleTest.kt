@@ -7,16 +7,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.jayway.jsonassert.JsonAssert
 import com.jayway.jsonassert.JsonAsserter
 import org.hamcrest.CoreMatchers
-import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert
-import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.Is
-import org.hamcrest.core.Is.`is`
 import org.junit.Before
 import org.junit.Test
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates
-import org.zalando.guild.api.json.fields.java.model.FieldPredicates.*
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Proxy
@@ -113,8 +109,8 @@ class JsonFieldsModuleTest {
             executorService.submit(task)
         }
         executorService.shutdown()
-        assertThat(executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS), `is`(true))
-        assertThat(runs.get(), `is`(totalRuns))
+        MatcherAssert.assertThat(executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS), Is.`is`(true))
+        MatcherAssert.assertThat(runs.get(), Is.`is`(totalRuns))
     }
 
     private fun task(runsPerThread: Int): CountingRunner {
@@ -129,51 +125,55 @@ class JsonFieldsModuleTest {
         }
 
         private fun doRun() {
+            println("allFieldsEnabled")
             allFieldsEnabled()
+            println("noFieldsEnabled")
             noFieldsEnabled()
+            println("simpleMatch")
             simpleMatch()
+            println("complicatedMatch")
             complicatedMatch()
             runs.incrementAndGet()
         }
 
         private fun complicatedMatch() {
             PREDICATE.set(
-                and(
-                    not(matchIndex(1, "bar")),
-                    not(matchIndex(0, "foo2"))
+                FieldPredicates.and(
+                    FieldPredicates.not(FieldPredicates.matchIndex(1, "bar")),
+                    FieldPredicates.not(FieldPredicates.matchIndex(0, "foo2"))
                 )
             ) //
-            asserterFor(outer).assertThat("$.foo2", `is`(nullValue())) //
-                .assertThat("$.foo.bar", `is`(nullValue())) //
-                .assertThat("$.foo.bar2", `is`(124)) //
+            asserterFor(outer).assertThat("$.foo2", Is.`is`(CoreMatchers.nullValue()), "reason") //
+                .assertThat("$.foo.bar", Is.`is`(CoreMatchers.nullValue()), "reason") //
+                .assertThat("$.foo.bar2", Is.`is`(124)) //
         }
 
         private fun simpleMatch() {
-            PREDICATE.set(matchIndex(1, "bar"))
-            asserterFor(outer).assertThat("$.foo2", `is`("FOO2")) //
-                .assertThat("$.foo.bar.baz", `is`("BAZ")) //
-                .assertThat("$.foo.bar2", `is`(nullValue())) //
-                .assertThat("$.foo.bar.phleem", `is`(true)) //
+            PREDICATE.set(FieldPredicates.matchIndex(1, "bar"))
+            asserterFor(outer).assertThat("$.foo2", Is.`is`("FOO2"), "reason") //
+                .assertThat("$.foo.bar.baz", Is.`is`("BAZ"), "reason") //
+                .assertThat("$.foo.bar2", Is.`is`(CoreMatchers.nullValue()), "reason") //
+                .assertThat("$.foo.bar.phleem", Is.`is`(true), "reason") //
         }
 
         private fun noFieldsEnabled() {
-            PREDICATE.set(alwaysFalse())
-            asserterFor(outer).assertThat("$.foo", `is`(nullValue())) //
-                .assertThat("$.foo2", `is`(nullValue())) //
+            PREDICATE.set(FieldPredicates.alwaysFalse())
+            asserterFor(outer).assertThat("$.foo", Is.`is`(CoreMatchers.nullValue()), "reason") //
+                .assertThat("$.foo2", Is.`is`(CoreMatchers.nullValue()), "reason") //
         }
 
         private fun allFieldsEnabled() {
-            PREDICATE.set(alwaysTrue())
-            asserterFor(outer).assertThat("$.foo2", `is`("FOO2")) //
-                .assertThat("$.foo.bar.baz", `is`("BAZ")) //
-                .assertThat("$.foo.bar2", `is`(123)) //
-                .assertThat("$.foo.bar.phleem", `is`(true)) //
+            PREDICATE.set(FieldPredicates.alwaysTrue())
+            asserterFor(outer).assertThat("$.foo2", Is.`is`("FOO2"), "reason") //
+                .assertThat("$.foo.bar.baz", Is.`is`("BAZ"), "reason") //
+                .assertThat("$.foo.bar2", Is.`is`(123), "reason") //
+                .assertThat("$.foo.bar.phleem", Is.`is`(true), "reason") //
         }
     }
 
     companion object {
         private val PREDICATE: ThreadLocal<FieldPredicate> = object : InheritableThreadLocal<FieldPredicate>() {
-            override fun initialValue(): FieldPredicate = alwaysTrue()
+            override fun initialValue(): FieldPredicate = FieldPredicates.alwaysTrue()
         }
     }
 }

@@ -10,6 +10,7 @@
         <module>grammar</module>
         <module>java</module>
         <module>jackson</module>
+        <module>web</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
