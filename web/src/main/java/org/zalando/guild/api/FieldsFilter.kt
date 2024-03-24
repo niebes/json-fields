@@ -1,42 +1,42 @@
 package org.zalando.guild.api
 
-import com.google.common.base.Strings
-import com.google.common.base.Supplier
 import org.slf4j.LoggerFactory
 import org.zalando.guild.api.json.fields.java.expression.ParserFramework
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates
 import java.io.IOException
 import java.text.MessageFormat
-import javax.servlet.*
+import javax.servlet.Filter
+import javax.servlet.FilterChain
+import javax.servlet.FilterConfig
+import javax.servlet.ServletException
+import javax.servlet.ServletRequest
+import javax.servlet.ServletResponse
 
 class FieldsFilter @JvmOverloads constructor(
     private val parameter: String = "fields",
     defaultFields: String? = null
 ) : Filter {
-    private val defaultFieldPredicate: FieldPredicate
+    private val defaultFieldPredicate: FieldPredicate = parseOrDefault(defaultFields, FieldPredicates.alwaysTrue())
 
-    init {
-        defaultFieldPredicate =
-            if (Strings.isNullOrEmpty(defaultFields)) FieldPredicates.alwaysTrue()
-            else ParserFramework.parseFieldsExpression(defaultFields!!)
-    }
+    private fun parseOrDefault(defaultFields: String?, default: FieldPredicate) =
+        when (defaultFields?.takeIf(String::isNotBlank)) {
+            null -> default
+            else -> ParserFramework.parseFieldsExpression(defaultFields)
+        }
 
     private fun setFieldPredicate(fields: String?) {
-        try {
-            if (Strings.isNullOrEmpty(fields)) {
-                FIELD_PREDICATE.set(defaultFieldPredicate)
-            } else {
-                val fieldsExpression = ParserFramework.parseFieldsExpression(fields!!)
-                FIELD_PREDICATE.set(fieldsExpression)
-            }
-        } catch (e: RuntimeException) {
+        runCatching {
+            parseOrDefault(fields, defaultFieldPredicate)
+        }.onFailure { e ->
             logger.warn(
                 MessageFormat.format("error while filtering fields. skip filter for fields: {0}", fields),
                 e
             )
-            FIELD_PREDICATE.set(defaultFieldPredicate)
-        }
+        }.fold(
+            { it },
+            { defaultFieldPredicate }
+        ).let(FIELD_PREDICATE::set)
     }
 
     override fun init(filterConfig: FilterConfig) {
@@ -64,6 +64,5 @@ class FieldsFilter @JvmOverloads constructor(
         private val FIELD_PREDICATE: ThreadLocal<FieldPredicate> = object : InheritableThreadLocal<FieldPredicate>() {
             override fun initialValue(): FieldPredicate = ALL_FIELDS_PREDICATE
         }
-        val FIELD_PREDICATE_SUPPLIER = Supplier(FIELD_PREDICATE::get)
     }
 }

@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ser.PropertyFilter
 import com.fasterxml.jackson.databind.ser.PropertyWriter
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
-import com.google.common.base.Preconditions
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
 import java.util.function.Supplier
 
@@ -21,15 +20,11 @@ import java.util.function.Supplier
  * @since   23.09.2015
  */
 class JsonFieldsFilterProvider(
-   predicateSupplier: Supplier<FieldPredicate>,
-   contextProvider: ContextProvider
-) : SimpleFilterProvider() {
-    private val predicateSupplier: Supplier<FieldPredicate>
+    private val predicateSupplier: Supplier<FieldPredicate>,
     private val contextProvider: ContextProvider
+) : SimpleFilterProvider() {
 
     init {
-        this.predicateSupplier = Preconditions.checkNotNull(predicateSupplier, "PredicateProvider required")
-        this.contextProvider = Preconditions.checkNotNull(contextProvider, "ContextProvider required")
         super.setFailOnUnknownId(false)
     }
 
@@ -46,10 +41,14 @@ class JsonFieldsFilterProvider(
         return FieldPredicatePropertyFilter(propertyFilter ?: INCLUDE_ALL)
     }
 
-    private inner class FieldPredicatePropertyFilter(private val delegate: PropertyFilter) : PropertyFilter {
-        @Throws(Exception::class)
+    private inner class FieldPredicatePropertyFilter(
+        private val delegate: PropertyFilter
+    ) : PropertyFilter {
+
         override fun serializeAsField(
-            pojo: Any, jgen: JsonGenerator, prov: SerializerProvider,
+            pojo: Any,
+            jgen: JsonGenerator,
+            prov: SerializerProvider,
             writer: PropertyWriter
         ) {
             val name = writer.name
@@ -64,15 +63,14 @@ class JsonFieldsFilterProvider(
             }
         }
 
-        private fun qualifiedPath(path: String): List<String> {
-            val context = contextProvider.context
-            val paths: MutableList<String> = ArrayList(context.size + 1)
-            paths.addAll(context)
-            paths.add(path)
-            return paths
+        private fun qualifiedPath(
+            path: String
+        ): List<String> = buildList {
+            addAll(contextProvider.context)
+            add(path)
         }
 
-        @Throws(Exception::class)
+
         override fun serializeAsElement(
             elementValue: Any, jgen: JsonGenerator,
             prov: SerializerProvider, writer: PropertyWriter
@@ -82,9 +80,11 @@ class JsonFieldsFilterProvider(
 
         @Throws(JsonMappingException::class)
         override fun depositSchemaProperty(
-            writer: PropertyWriter, propertiesNode: ObjectNode,
+            writer: PropertyWriter,
+            propertiesNode: ObjectNode,
             provider: SerializerProvider
         ) {
+            @Suppress("DEPRECATION") // delegate
             delegate.depositSchemaProperty(writer, propertiesNode, provider)
         }
 
