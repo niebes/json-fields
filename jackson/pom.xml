@@ -147,7 +147,7 @@
 
     <properties>
         <servlet.version>4.0.1</servlet.version>
-        <jackson.version>2.20.0</jackson.version>
+        <jackson.version>2.20.1</jackson.version>
         <kotlin.version>1.9.24</kotlin.version>
     </properties>
 
