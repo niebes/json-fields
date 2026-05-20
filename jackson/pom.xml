@@ -100,15 +100,9 @@
 
         <!-- optional dependencies -->
         <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
             <version>${servlet.version}</version>
-            <!-- only needed if you use the servlet support -->
             <optional>true</optional>
         </dependency>
 
@@ -146,7 +140,7 @@
 
 
     <properties>
-        <servlet.version>4.0.1</servlet.version>
+        <servlet.version>6.1.0</servlet.version>
         <jackson.version>2.21.3</jackson.version>
         <kotlin.version>1.9.24</kotlin.version>
     </properties>

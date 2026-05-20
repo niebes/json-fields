@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ser.PropertyFilter
 import com.fasterxml.jackson.databind.ser.PropertyWriter
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
-import com.google.common.base.Preconditions
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
 import java.util.function.Supplier
 
@@ -28,8 +27,8 @@ class JsonFieldsFilterProvider(
     private val contextProvider: ContextProvider
 
     init {
-        this.predicateSupplier = Preconditions.checkNotNull(predicateSupplier, "PredicateProvider required")
-        this.contextProvider = Preconditions.checkNotNull(contextProvider, "ContextProvider required")
+        this.predicateSupplier = requireNotNull(predicateSupplier) { "PredicateProvider required" }
+        this.contextProvider = requireNotNull(contextProvider) { "ContextProvider required" }
         super.setFailOnUnknownId(false)
     }
 

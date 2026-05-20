@@ -1,6 +1,5 @@
 package org.zalando.guild.api.json.fields.java.expression
 
-import com.google.common.base.Preconditions
 import org.antlr.v4.runtime.BailErrorStrategy
 import org.antlr.v4.runtime.BaseErrorListener
 import org.antlr.v4.runtime.CharStreams
@@ -12,7 +11,6 @@ import org.zalando.guild.api.json.fields.java.model.FieldPredicate
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates.alwaysFalse
 import org.zalando.guild.api.json.fields.java.parser.JsonFieldsLexer
 import org.zalando.guild.api.json.fields.java.parser.JsonFieldsParser
-import javax.annotation.Nonnull
 
 /**
  * Entry point for parsing Json field expressions into [FieldPredicate]s.
@@ -47,7 +45,6 @@ object ParserFramework {
         fieldsExpression: String,
         throwIfInvalid: Boolean
     ): FieldPredicate {
-        Preconditions.checkNotNull(fieldsExpression, "FieldsExpression required")
         try {
             val lexer = JsonFieldsLexer(CharStreams.fromString(fieldsExpression))
             lexer.removeErrorListeners()

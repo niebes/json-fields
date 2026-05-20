@@ -1,9 +1,9 @@
 package org.zalando.guild.api.json.fields.jackson.servlet
 
-import com.google.common.base.Function
-import com.google.common.base.Supplier
+import jakarta.servlet.http.HttpServletRequest
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
-import javax.servlet.http.HttpServletRequest
+import java.util.function.Function
+import java.util.function.Supplier
 
 /**
  * FieldPredicate supplier that gets the predicate from a HttpServletRequest supplier and a Transformer function.

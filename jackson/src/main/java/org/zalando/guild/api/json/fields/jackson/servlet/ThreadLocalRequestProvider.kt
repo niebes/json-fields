@@ -1,8 +1,7 @@
 package org.zalando.guild.api.json.fields.jackson.servlet
 
-import com.google.common.base.Preconditions
-import com.google.common.base.Supplier
-import javax.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletRequest
+import java.util.function.Supplier
 
 /**
  * Request Provider that uses ThreadLocals. This obviously won't work in an asynchronous environment.
