@@ -1,7 +1,5 @@
 package org.zalando.guild.api.json.fields.java.model
 
-import javax.annotation.Nonnull
-
 /**
  * Factory methods for constructing [FieldPredicate]s.
  *
@@ -18,7 +16,6 @@ object FieldPredicates {
      * Return a [FieldPredicate] that matches everything.
      */
     @JvmStatic
-    @Nonnull
     fun alwaysTrue(): FieldPredicate {
         return ALWAYS_TRUE
     }
@@ -27,7 +24,6 @@ object FieldPredicates {
      * Return a [FieldPredicate] that matches nothing.
      */
     @JvmStatic
-    @Nonnull
     fun alwaysFalse(): FieldPredicate {
         return ALWAYS_FALSE
     }
@@ -36,7 +32,6 @@ object FieldPredicates {
      * Return a [FieldPredicate] that returns true if all of the supplied [FieldPredicate]s return true.
      */
     @JvmStatic
-    @Nonnull
     fun and(
         first: FieldPredicate,
         vararg more: FieldPredicate

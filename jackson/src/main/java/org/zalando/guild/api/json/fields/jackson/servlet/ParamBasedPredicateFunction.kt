@@ -1,11 +1,10 @@
 package org.zalando.guild.api.json.fields.jackson.servlet
 
-import com.google.common.base.Function
-import com.google.common.base.Preconditions
+import jakarta.servlet.http.HttpServletRequest
 import org.zalando.guild.api.json.fields.java.expression.ParserFramework
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates
-import javax.servlet.http.HttpServletRequest
+import java.util.function.Function
 
 /**
  * A Predicate Function that parses a FieldPredicate from a request parameter.
@@ -25,9 +24,8 @@ open class ParamBasedPredicateFunction
      * Open-closed principle.
      */
 
-    override fun apply(request: HttpServletRequest?): FieldPredicate {
-        Preconditions.checkNotNull(request, "Request required")
-        val parameterValue = request!!.getParameter(paramName)
+    override fun apply(request: HttpServletRequest): FieldPredicate {
+        val parameterValue = request.getParameter(paramName)
         return if (parameterValue != null) {
             try {
                 ParserFramework.parseFieldsExpressionOrFail(parameterValue)
