@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.databind.ser.FilterProvider
 import org.zalando.guild.api.json.fields.jackson.generated.PackageVersion
+import org.zalando.guild.api.json.fields.jackson.servlet.JsonFieldsFilter
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
 import java.util.function.Supplier
 
@@ -46,5 +47,13 @@ class JsonFieldsModule private constructor(
             predicateSupplier: Supplier<FieldPredicate>,
             contextProvider: ContextProvider
         ): JsonFieldsModule = JsonFieldsModule(predicateSupplier, contextProvider)
+
+        /**
+         * Instantiate the module from a [JsonFieldsFilter], which serves as both
+         * the predicate supplier and the source of the context provider.
+         */
+        fun createJsonFieldsModule(
+            filter: JsonFieldsFilter
+        ): JsonFieldsModule = JsonFieldsModule(filter, filter.contextProvider())
     }
 }

@@ -26,6 +26,8 @@ class ThreadLocalRequestProvider private constructor() : Supplier<HttpServletReq
     companion object {
         private val REQUEST = ThreadLocal<HttpServletRequest>()
 
+        fun getInstance(): ThreadLocalRequestProvider = Holder.instance
+
         /**
          * Assign the HttpServletRequest to the ThreadLocal. This will usually be called from a Filter or Interceptor. Don't
          * forget to call [.removeRequest] at the end of the request, or you'll have a memory leak.
