@@ -6,8 +6,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
+import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.zalando.guild.api.json.fields.jackson.JsonFieldsModule
+import org.zalando.guild.api.json.fields.jackson.JsonFieldsProperties
 
 @AutoConfiguration(before = [JacksonAutoConfiguration::class])
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
@@ -16,8 +18,13 @@ import org.zalando.guild.api.json.fields.jackson.JsonFieldsModule
 class JsonFieldsWebFluxAutoConfiguration {
 
     @Bean
+    @ConfigurationProperties("spring.json-fields")
+    fun jsonFieldsProperties(): JsonFieldsProperties = JsonFieldsProperties()
+
+    @Bean
     @ConditionalOnMissingBean
-    fun jsonFieldsWebFilter(): JsonFieldsWebFilter = JsonFieldsWebFilter()
+    fun jsonFieldsWebFilter(properties: JsonFieldsProperties): JsonFieldsWebFilter =
+        JsonFieldsWebFilter(properties.parameterName)
 
     @Bean
     @ConditionalOnMissingBean
