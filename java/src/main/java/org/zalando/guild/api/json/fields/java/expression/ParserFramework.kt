@@ -15,27 +15,42 @@ import java.util.concurrent.ConcurrentHashMap
 
 object ParserFramework {
     private const val MAX_CACHE_SIZE = 1000
+    private const val MAX_CACHEABLE_LENGTH = 256
     private val cache = ConcurrentHashMap<String, FieldPredicate>()
 
     @JvmStatic
     fun parseFieldsExpression(fieldsExpression: String): FieldPredicate {
-        return cache.getOrPut(fieldsExpression) {
-            doParse(fieldsExpression) ?: alwaysFalse()
+        if (fieldsExpression.length <= MAX_CACHEABLE_LENGTH) {
+            cache[fieldsExpression]?.let { return it }
         }
-    }
-
-    fun parseFieldsExpressionOrFail(fieldsExpression: String): FieldPredicate {
-        cache[fieldsExpression]?.let { return it }
-        val result = doParse(fieldsExpression)
-            ?: throw IllegalArgumentException("Invalid fields expression: $fieldsExpression")
-        cache.putIfAbsent(fieldsExpression, result)
+        val result = doParse(fieldsExpression) ?: return alwaysFalse()
+        if (fieldsExpression.length <= MAX_CACHEABLE_LENGTH) {
+            evictIfFull()
+            cache.putIfAbsent(fieldsExpression, result)
+        }
         return result
     }
 
-    private fun doParse(fieldsExpression: String): FieldPredicate? {
+    fun parseFieldsExpressionOrFail(fieldsExpression: String): FieldPredicate {
+        if (fieldsExpression.length <= MAX_CACHEABLE_LENGTH) {
+            cache[fieldsExpression]?.let { return it }
+        }
+        val result = doParse(fieldsExpression)
+            ?: throw IllegalArgumentException("Invalid fields expression")
+        if (fieldsExpression.length <= MAX_CACHEABLE_LENGTH) {
+            evictIfFull()
+            cache.putIfAbsent(fieldsExpression, result)
+        }
+        return result
+    }
+
+    private fun evictIfFull() {
         if (cache.size >= MAX_CACHE_SIZE) {
             cache.clear()
         }
+    }
+
+    private fun doParse(fieldsExpression: String): FieldPredicate? {
         return try {
             val lexer = JsonFieldsLexer(CharStreams.fromString(fieldsExpression))
             lexer.removeErrorListeners()
@@ -46,7 +61,7 @@ object ParserFramework {
             parser.addErrorListener(STRICT_LISTENER)
             parser.errorHandler = BailErrorStrategy()
             FieldPredicateVisitor().visitJson_fields(parser.json_fields())
-        } catch (_: ParseCancellationException) {
+        } catch (e: ParseCancellationException) {
             null
         }
     }
