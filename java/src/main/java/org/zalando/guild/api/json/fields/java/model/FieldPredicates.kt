@@ -65,6 +65,16 @@ object FieldPredicates {
         token: String
     ): FieldPredicate = MatchIndexPredicate(index, token)
 
+    /**
+     * Return a [FieldPredicate] that returns true if the field hierarchy has fewer than
+     * [minDepth] elements. Used to guard nested sub-expressions so that parent fields
+     * are not incorrectly excluded by negation at deeper levels.
+     */
+    @JvmStatic
+    fun depthLessThan(
+        minDepth: Int
+    ): FieldPredicate = DepthLessThanPredicate(minDepth)
+
 
     private class AndPredicate(
         private val first: FieldPredicate,
@@ -165,6 +175,16 @@ object FieldPredicates {
 
         override fun toString(): String {
             return String.format("match '%s' at index %d", token, index)
+        }
+    }
+
+    private class DepthLessThanPredicate(private val minDepth: Int) : FieldPredicate {
+        override fun test(fieldHierarchy: List<String>): Boolean {
+            return fieldHierarchy.size < minDepth
+        }
+
+        override fun toString(): String {
+            return String.format("depth < %d", minDepth)
         }
     }
 }

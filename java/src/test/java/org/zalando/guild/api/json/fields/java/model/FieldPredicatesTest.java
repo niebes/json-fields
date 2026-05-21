@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.alwaysFalse;
 import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.alwaysTrue;
 import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.and;
+import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.depthLessThan;
 import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.matchIndex;
 import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.not;
 import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.or;
@@ -91,6 +92,15 @@ public class FieldPredicatesTest {
         assertThat(not(True), doesntMatchTokens(ANY_FIELD_NAME));
         assertThat(not(False), matchesTokens(ANY_FIELD_NAME));
 
+    }
+
+    @Test
+    public void depthGuard() throws Exception {
+        assertThat(depthLessThan(1), doesntMatchTokens("foo"));
+        assertThat(depthLessThan(2), matchesTokens("foo"));
+        assertThat(depthLessThan(2), doesntMatchTokens("foo", "bar"));
+        assertThat(depthLessThan(3), matchesTokens("foo", "bar"));
+        assertThat(depthLessThan(3), doesntMatchTokens("foo", "bar", "baz"));
     }
 
     @Test
