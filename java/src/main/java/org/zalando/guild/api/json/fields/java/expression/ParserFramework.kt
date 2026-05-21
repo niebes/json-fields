@@ -11,58 +11,43 @@ import org.zalando.guild.api.json.fields.java.model.FieldPredicate
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates.alwaysFalse
 import org.zalando.guild.api.json.fields.java.parser.JsonFieldsLexer
 import org.zalando.guild.api.json.fields.java.parser.JsonFieldsParser
+import java.util.concurrent.ConcurrentHashMap
 
-/**
- * Entry point for parsing Json field expressions into [FieldPredicate]s.
- *
- * @author  Sean Patrick Floyd (sean.floyd@zalando.de)
- * @since   07.09.2015
- */
 object ParserFramework {
-    /**
-     * Returns a FieldPredicate consistent with the semantics of the supplied Json Fields expression. If the expression
-     * is invalid, the returned predicate will not match anything.
-     *
-     * @exception  NullPointerException  if null is passed in
-     */
+    private const val MAX_CACHE_SIZE = 1000
+    private val cache = ConcurrentHashMap<String, FieldPredicate>()
+
     @JvmStatic
     fun parseFieldsExpression(fieldsExpression: String): FieldPredicate {
-        return parseFieldsExpression(fieldsExpression, false)
+        return cache.getOrPut(fieldsExpression) {
+            doParse(fieldsExpression) ?: alwaysFalse()
+        }
     }
 
-    /**
-     * Returns a FieldPredicate consistent with the semantics of the supplied Json Fields expression. If the expression
-     * is invalid, an [IllegalArgumentException] will be thrown.
-     *
-     * @exception  NullPointerException      if null is passed in
-     * @exception  IllegalArgumentException  if the expression has invalid syntax
-     */
     fun parseFieldsExpressionOrFail(fieldsExpression: String): FieldPredicate {
-        return parseFieldsExpression(fieldsExpression, true)
+        cache[fieldsExpression]?.let { return it }
+        val result = doParse(fieldsExpression)
+            ?: throw IllegalArgumentException("Invalid fields expression: $fieldsExpression")
+        cache.putIfAbsent(fieldsExpression, result)
+        return result
     }
 
-    private fun parseFieldsExpression(
-        fieldsExpression: String,
-        throwIfInvalid: Boolean
-    ): FieldPredicate {
-        try {
+    private fun doParse(fieldsExpression: String): FieldPredicate? {
+        if (cache.size >= MAX_CACHE_SIZE) {
+            cache.clear()
+        }
+        return try {
             val lexer = JsonFieldsLexer(CharStreams.fromString(fieldsExpression))
             lexer.removeErrorListeners()
-
             lexer.addErrorListener(STRICT_LISTENER)
 
             val parser = JsonFieldsParser(CommonTokenStream(lexer))
             parser.removeErrorListeners()
-
             parser.addErrorListener(STRICT_LISTENER)
             parser.errorHandler = BailErrorStrategy()
-            return FieldPredicateVisitor().visitJson_fields(parser.json_fields())
-        } catch (e: ParseCancellationException) {
-            if (throwIfInvalid) {
-                throw IllegalArgumentException(e)
-            } else {
-                return alwaysFalse()
-            }
+            FieldPredicateVisitor().visitJson_fields(parser.json_fields())
+        } catch (_: ParseCancellationException) {
+            null
         }
     }
 
