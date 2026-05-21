@@ -9,8 +9,8 @@ Add the dependency for your framework:
 **Spring WebMVC (Servlet)**
 ```xml
 <dependency>
-    <groupId>org.zalando.guild.api</groupId>
-    <artifactId>json-fields-webmvc</artifactId>
+    <groupId>net.niebes</groupId>
+    <artifactId>jsonfields-webmvc</artifactId>
     <version>0.5.4-SNAPSHOT</version>
 </dependency>
 ```
@@ -18,13 +18,22 @@ Add the dependency for your framework:
 **Spring WebFlux (Reactive)**
 ```xml
 <dependency>
-    <groupId>org.zalando.guild.api</groupId>
-    <artifactId>json-fields-webflux</artifactId>
+    <groupId>net.niebes</groupId>
+    <artifactId>jsonfields-webflux</artifactId>
     <version>0.5.4-SNAPSHOT</version>
 </dependency>
 ```
 
 Spring Boot auto-configuration registers everything automatically. No `@Bean` declarations needed.
+
+## Configuration
+
+```yaml
+spring:
+  json-fields:
+    enabled: true          # set to false to disable filtering
+    parameter-name: fields # customize the query parameter name
+```
 
 ## Fields Expression Syntax
 
@@ -52,11 +61,11 @@ GET /api/users?fields=(id,profile!(internal_notes))
 
 | Module | Description |
 |--------|-------------|
-| `json-fields-grammar` | ANTLR4 grammar definition ([JsonFields.g4](grammar/src/main/antlr4/JsonFields.g4)) |
-| `json-fields-java` | Parser and `FieldPredicate` model (framework-agnostic) |
-| `json-fields-jackson` | Jackson `Module` and `FilterProvider` (framework-agnostic) |
-| `json-fields-webmvc` | Servlet filter + Spring Boot auto-configuration |
-| `json-fields-webflux` | WebFilter + Reactor context-propagation + Spring Boot auto-configuration |
+| `jsonfields-grammar` | ANTLR4 grammar definition ([JsonFields.g4](grammar/src/main/antlr4/JsonFields.g4)) |
+| `jsonfields-core` | Parser and `FieldPredicate` model (framework-agnostic) |
+| `jsonfields-jackson` | Jackson `Module` and `FilterProvider` (framework-agnostic) |
+| `jsonfields-webmvc` | Servlet filter + Spring Boot auto-configuration |
+| `jsonfields-webflux` | WebFilter + Reactor context-propagation + Spring Boot auto-configuration |
 
 ## Requirements
 

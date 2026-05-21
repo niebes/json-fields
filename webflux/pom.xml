@@ -2,13 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.zalando.guild.api</groupId>
-        <artifactId>json-fields</artifactId>
+        <groupId>net.niebes</groupId>
+        <artifactId>jsonfields</artifactId>
         <version>0.5.4-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>json-fields-webflux</artifactId>
+    <artifactId>jsonfields-webflux</artifactId>
 
     <dependencyManagement>
         <dependencies>
@@ -25,7 +25,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>json-fields-jackson</artifactId>
+            <artifactId>jsonfields-jackson</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
