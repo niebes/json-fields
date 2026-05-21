@@ -13,7 +13,7 @@ interface ContextProvider {
     /**
      * Add the supplied field name to the end of the context.
      */
-    fun pushContext(context: String?)
+    fun pushContext(context: String)
 
     /**
      * Remove the last element from the field context.

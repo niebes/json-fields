@@ -14,7 +14,7 @@ class ThreadLocalContextProvider private constructor() : ContextProvider {
     override val context: List<String>
         get() = Collections.unmodifiableList(STORE.get())
 
-    override fun pushContext(context: String?) {
+    override fun pushContext(context: String) {
         STORE.get().addLast(context)
     }
 
