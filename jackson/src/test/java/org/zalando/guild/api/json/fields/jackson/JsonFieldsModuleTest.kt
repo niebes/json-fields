@@ -33,16 +33,19 @@ class JsonFieldsModuleTest {
         objectMapper!!.registerModule(JsonFieldsModule.createJsonFieldsModule(predicateSupplier))
     }
 
+    @Suppress("unused")
     internal class Outer {
         private val foo = Middle()
         private val foo2 = "FOO2"
     }
 
+    @Suppress("unused")
     internal class Middle {
         private val bar = Inner()
         private val bar2 = 123
     }
 
+    @Suppress("unused")
     internal class Inner {
         private val baz = "BAZ"
         private val phleem = true
