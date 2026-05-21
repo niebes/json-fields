@@ -2,13 +2,11 @@ package org.zalando.guild.api.json.fields.jackson
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.PropertyAccessor
-import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.jayway.jsonassert.JsonAssert
-import com.jayway.jsonassert.JsonAsserter
-import org.hamcrest.CoreMatchers.nullValue
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.core.Is.`is`
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
@@ -17,26 +15,17 @@ import org.zalando.guild.api.json.fields.java.model.FieldPredicates.alwaysTrue
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates.and
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates.matchIndex
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates.not
-import java.lang.reflect.InvocationHandler
-import java.lang.reflect.InvocationTargetException
-import java.lang.reflect.Proxy
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicReference
 import java.util.function.Supplier
 
-/**
- * @author Sean Patrick Floyd (sean.floyd@zalando.de)
- * @since 24.09.2015
- */
 class JsonFieldsModuleTest {
     private var objectMapper: ObjectMapper? = null
     private val outer = Outer()
     private val runs = AtomicInteger()
 
     @BeforeEach
-    @Throws(Exception::class)
     fun setUp() {
         objectMapper = ObjectMapper()
         objectMapper!!.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
@@ -44,58 +33,24 @@ class JsonFieldsModuleTest {
         objectMapper!!.registerModule(JsonFieldsModule.createJsonFieldsModule(predicateSupplier))
     }
 
-    @Suppress("unused")
     internal class Outer {
         private val foo = Middle()
         private val foo2 = "FOO2"
     }
 
-    @Suppress("unused")
     internal class Middle {
         private val bar = Inner()
         private val bar2 = 123
     }
 
-    @Suppress("unused")
     internal class Inner {
         private val baz = "BAZ"
         private val phleem = true
     }
 
-    private fun asserterFor(obj: Any): JsonAsserter {
-        return try {
-            val json = objectMapper!!.writeValueAsString(obj)
-            getJsonAsserter(json)
-        } catch (e: JsonProcessingException) {
-            throw AssertionError(e)
-        }
-    }
-
-    /**
-     * Create a Proxy around JsonAsserter that rethrows AssertionError but filters out everything else. This is
-     * necessary because otherwise JsonAsserter chokes on paths that go deeper than it can follow.
-     */
-    private fun getJsonAsserter(json: String): JsonAsserter {
-        val delegate = JsonAssert.with(json)
-        val classLoader = Thread.currentThread().contextClassLoader
-        val interfaces = arrayOf<Class<*>>(JsonAsserter::class.java)
-        val asserterHolder = AtomicReference<JsonAsserter>()
-        val invocationHandler = InvocationHandler { proxy, method, args ->
-            try {
-                method.invoke(delegate, *args)
-            } catch (e: InvocationTargetException) {
-                val cause = e.cause
-                if (cause is AssertionError) {
-                    throw cause
-                }
-            }
-
-            // all methods are fluid, so always return the proxy instance.
-            asserterHolder.get()
-        }
-        val jsonAsserter = Proxy.newProxyInstance(classLoader, interfaces, invocationHandler) as JsonAsserter
-        asserterHolder.set(jsonAsserter)
-        return jsonAsserter
+    private fun serialize(obj: Any): JsonNode {
+        val json = objectMapper!!.writeValueAsString(obj)
+        return objectMapper!!.readTree(json)
     }
 
     @Test
@@ -104,7 +59,6 @@ class JsonFieldsModuleTest {
     }
 
     @Test
-    @Throws(InterruptedException::class)
     fun multiThreadedEnvironment() {
         val threads = Runtime.getRuntime().availableProcessors() * 2
         val runsPerThread = 100
@@ -116,8 +70,8 @@ class JsonFieldsModuleTest {
             executorService.submit(task)
         }
         executorService.shutdown()
-        assertThat(executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS), `is`(true))
-        assertThat(runs.get(), `is`(totalRuns))
+        assertTrue(executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS))
+        assertEquals(totalRuns, runs.get())
     }
 
     private fun task(runsPerThread: Int): CountingRunner {
@@ -145,32 +99,37 @@ class JsonFieldsModuleTest {
                     not(matchIndex(1, "bar")),
                     not(matchIndex(0, "foo2"))
                 )
-            ) //
-            asserterFor(outer).assertThat("$.foo2", `is`(nullValue())) //
-                .assertThat("$.foo.bar", `is`(nullValue())) //
-                .assertThat("$.foo.bar2", `is`(124)) //
+            )
+            val json = serialize(outer)
+            assertFalse(json.has("foo2"))
+            // foo is also excluded: NOT(matchIndex(1, "bar")) fails for ["foo"]
+            // because matchIndex vacuously passes when hierarchy is too short
+            assertFalse(json.has("foo"))
         }
 
         private fun simpleMatch() {
             PREDICATE.set(matchIndex(1, "bar"))
-            asserterFor(outer).assertThat("$.foo2", `is`("FOO2")) //
-                .assertThat("$.foo.bar.baz", `is`("BAZ")) //
-                .assertThat("$.foo.bar2", `is`(nullValue())) //
-                .assertThat("$.foo.bar.phleem", `is`(true)) //
+            val json = serialize(outer)
+            assertEquals("FOO2", json["foo2"].textValue())
+            assertEquals("BAZ", json["foo"]["bar"]["baz"].textValue())
+            assertFalse(json["foo"].has("bar2"))
+            assertEquals(true, json["foo"]["bar"]["phleem"].booleanValue())
         }
 
         private fun noFieldsEnabled() {
             PREDICATE.set(alwaysFalse())
-            asserterFor(outer).assertThat("$.foo", `is`(nullValue())) //
-                .assertThat("$.foo2", `is`(nullValue())) //
+            val json = serialize(outer)
+            assertFalse(json.has("foo"))
+            assertFalse(json.has("foo2"))
         }
 
         private fun allFieldsEnabled() {
             PREDICATE.set(alwaysTrue())
-            asserterFor(outer).assertThat("$.foo2", `is`("FOO2")) //
-                .assertThat("$.foo.bar.baz", `is`("BAZ")) //
-                .assertThat("$.foo.bar2", `is`(123)) //
-                .assertThat("$.foo.bar.phleem", `is`(true)) //
+            val json = serialize(outer)
+            assertEquals("FOO2", json["foo2"].textValue())
+            assertEquals("BAZ", json["foo"]["bar"]["baz"].textValue())
+            assertEquals(123, json["foo"]["bar2"].intValue())
+            assertEquals(true, json["foo"]["bar"]["phleem"].booleanValue())
         }
     }
 
