@@ -7,6 +7,7 @@ import static org.hamcrest.core.IsNot.not;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,10 +85,18 @@ public class ParserFrameworkTest {
     }
 
     @Test
-    public void caching() {
+    public void cachingReturnsSameInstance() {
         var first = ParserFramework.parseFieldsExpression("(id,name)");
         var second = ParserFramework.parseFieldsExpression("(id,name)");
         assertSame(first, second);
+    }
+
+    @Test
+    public void invalidExpressionsAreNotCached() {
+        ParserFramework.parseFieldsExpression("invalid");
+        assertThrows(IllegalArgumentException.class, () ->
+            ParserFramework.INSTANCE.parseFieldsExpressionOrFail("invalid")
+        );
     }
 
     static Matcher<String> matchesFields(final String firstField, final String... moreFields) {
