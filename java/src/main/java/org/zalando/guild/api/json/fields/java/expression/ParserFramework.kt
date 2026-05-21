@@ -23,7 +23,11 @@ object ParserFramework {
         if (fieldsExpression.length <= MAX_CACHEABLE_LENGTH) {
             cache[fieldsExpression]?.let { return it }
         }
-        val result = doParse(fieldsExpression) ?: return alwaysFalse()
+        val result = try {
+            doParse(fieldsExpression)
+        } catch (_: ParseCancellationException) {
+            return alwaysFalse()
+        }
         if (fieldsExpression.length <= MAX_CACHEABLE_LENGTH) {
             evictIfFull()
             cache.putIfAbsent(fieldsExpression, result)
@@ -35,8 +39,11 @@ object ParserFramework {
         if (fieldsExpression.length <= MAX_CACHEABLE_LENGTH) {
             cache[fieldsExpression]?.let { return it }
         }
-        val result = doParse(fieldsExpression)
-            ?: throw IllegalArgumentException("Invalid fields expression")
+        val result = try {
+            doParse(fieldsExpression)
+        } catch (e: ParseCancellationException) {
+            throw IllegalArgumentException("Invalid fields expression", e)
+        }
         if (fieldsExpression.length <= MAX_CACHEABLE_LENGTH) {
             evictIfFull()
             cache.putIfAbsent(fieldsExpression, result)
@@ -50,20 +57,16 @@ object ParserFramework {
         }
     }
 
-    private fun doParse(fieldsExpression: String): FieldPredicate? {
-        return try {
-            val lexer = JsonFieldsLexer(CharStreams.fromString(fieldsExpression))
-            lexer.removeErrorListeners()
-            lexer.addErrorListener(STRICT_LISTENER)
+    private fun doParse(fieldsExpression: String): FieldPredicate {
+        val lexer = JsonFieldsLexer(CharStreams.fromString(fieldsExpression))
+        lexer.removeErrorListeners()
+        lexer.addErrorListener(STRICT_LISTENER)
 
-            val parser = JsonFieldsParser(CommonTokenStream(lexer))
-            parser.removeErrorListeners()
-            parser.addErrorListener(STRICT_LISTENER)
-            parser.errorHandler = BailErrorStrategy()
-            FieldPredicateVisitor().visitJson_fields(parser.json_fields())
-        } catch (e: ParseCancellationException) {
-            null
-        }
+        val parser = JsonFieldsParser(CommonTokenStream(lexer))
+        parser.removeErrorListeners()
+        parser.addErrorListener(STRICT_LISTENER)
+        parser.errorHandler = BailErrorStrategy()
+        return FieldPredicateVisitor().visitJson_fields(parser.json_fields())
     }
 
     private val STRICT_LISTENER: BaseErrorListener = object : BaseErrorListener() {
