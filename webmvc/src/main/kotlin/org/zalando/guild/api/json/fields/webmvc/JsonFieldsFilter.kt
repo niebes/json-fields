@@ -5,16 +5,12 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.ServletResponse
 import jakarta.servlet.http.HttpServletRequest
+import org.slf4j.LoggerFactory
 import org.zalando.guild.api.json.fields.java.expression.ParserFramework
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates
 import java.util.function.Supplier
 
-/**
- * A servlet Filter that extracts a fields expression from the request and provides
- * the resulting FieldPredicate. Register as a servlet filter and pass as the
- * predicateSupplier to [org.zalando.guild.api.json.fields.jackson.JsonFieldsModule].
- */
 class JsonFieldsFilter(
     private val paramName: String = DEFAULT_PARAM_NAME
 ) : Filter, Supplier<FieldPredicate> {
@@ -27,7 +23,8 @@ class JsonFieldsFilter(
         val predicate = if (fieldsParam != null) {
             try {
                 ParserFramework.parseFieldsExpressionOrFail(fieldsParam)
-            } catch (_: IllegalArgumentException) {
+            } catch (e: IllegalArgumentException) {
+                log.warn("Invalid fields expression '{}': {}", fieldsParam, e.message)
                 FieldPredicates.alwaysFalse()
             }
         } else {
@@ -47,5 +44,6 @@ class JsonFieldsFilter(
 
     companion object {
         private const val DEFAULT_PARAM_NAME = "fields"
+        private val log = LoggerFactory.getLogger(JsonFieldsFilter::class.java)
     }
 }

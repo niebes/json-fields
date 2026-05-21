@@ -10,10 +10,6 @@
 
     <artifactId>json-fields-webmvc</artifactId>
 
-    <properties>
-        <spring-boot.version>3.4.5</spring-boot.version>
-    </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -37,6 +33,10 @@
             <artifactId>jakarta.servlet-api</artifactId>
             <version>6.1.0</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

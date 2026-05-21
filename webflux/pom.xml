@@ -10,13 +10,6 @@
 
     <artifactId>json-fields-webflux</artifactId>
 
-    <properties>
-        <spring-boot.version>3.4.5</spring-boot.version>
-        <maven.deploy.skip>true</maven.deploy.skip>
-        <maven.install.skip>true</maven.install.skip>
-        <gpg.sign.skip>true</gpg.sign.skip>
-    </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
