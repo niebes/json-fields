@@ -2,6 +2,7 @@ package org.zalando.guild.api.json.fields.java.expression
 
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates.and
+import org.zalando.guild.api.json.fields.java.model.FieldPredicates.depthLessThan
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates.matchIndex
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates.not
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates.or
@@ -47,8 +48,9 @@ internal class FieldPredicateVisitor : JsonFieldsBaseVisitor<FieldPredicate?>() 
             return fieldPredicate
         } else {
             depth.incrementAndGet()
-
-            val result = and(fieldPredicate, visitFields_expression(fieldsExpressionContext))
+            val subExpression = visitFields_expression(fieldsExpressionContext)
+            val guardedSubExpression = or(depthLessThan(depth.get() + 1), subExpression)
+            val result = and(fieldPredicate, guardedSubExpression)
             depth.decrementAndGet()
             return result
         }

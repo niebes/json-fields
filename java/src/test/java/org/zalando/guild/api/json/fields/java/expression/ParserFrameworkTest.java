@@ -64,12 +64,22 @@ public class ParserFrameworkTest {
         assertThat("(foo(bar(baz)))", matchesFields("foo"));
         assertThat("(foo(bar(baz)))", matchesFields("foo", "bar"));
         assertThat("(foo(bar(baz)))", matchesFields("foo", "bar", "baz"));
+        assertThat("(foo!(bar(baz)))", matchesFields("foo"));
         assertThat("(foo!(bar(baz)))", matchesFields("foo", "phleem", "baz"));
         assertThat("(foo!(bar(baz)))", matchesFields("foo", "phleem", "phooey"));
         assertThat("(foo!(bar(baz)))", not(matchesFields("foo", "bar")));
         assertThat("(foo!(bar(baz)))", not(matchesFields("foo", "bar", "baz")));
         assertThat("(foo(bar(baz)))", not(matchesFields("foo", "bar", "phleem")));
         assertThat("(foo(bar(baz)))", not(matchesFields("foo", "phleem")));
+    }
+
+    @Test
+    public void nestedBlacklist() {
+        assertThat("(profile!(age))", matchesFields("profile"));
+        assertThat("(profile!(age))", not(matchesFields("profile", "age")));
+        assertThat("(profile!(age))", matchesFields("profile", "bio"));
+        assertThat("(profile!(age))", matchesFields("profile", "bio", "anything"));
+        assertThat("(profile!(age))", not(matchesFields("other")));
     }
 
     static Matcher<String> matchesFields(final String firstField, final String... moreFields) {
