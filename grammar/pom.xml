@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>json-fields</artifactId>
-        <groupId>org.zalando.guild.api</groupId>
+        <artifactId>jsonfields</artifactId>
+        <groupId>net.niebes</groupId>
         <version>0.5.4-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -11,7 +11,7 @@
         <antlr.output.dir>${project.build.directory}/generated-test-sources/antlr</antlr.output.dir>
     </properties>
 
-    <artifactId>json-fields-grammar</artifactId>
+    <artifactId>jsonfields-grammar</artifactId>
     <build>
         <resources>
             <resource>
@@ -30,12 +30,12 @@
                         </goals>
                         <phase>generate-test-sources</phase>
                         <configuration>
-                            <outputDirectory>${antlr.output.dir}/org/zalando/guild/api/json/fields/grammar/parser</outputDirectory>
+                            <outputDirectory>${antlr.output.dir}/net/niebes/jsonfields/grammar/parser</outputDirectory>
                             <visitor>true</visitor>
                             <listener>false</listener>
                             <arguments>
                                 <argument>-package</argument>
-                                <argument>org.zalando.guild.api.json.fields.grammar.parser</argument>
+                                <argument>net.niebes.jsonfields.grammar.parser</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -78,7 +78,7 @@
             <plugin>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <excludePackageNames>org.zalando.*</excludePackageNames>
+                    <excludePackageNames>net.niebes.*</excludePackageNames>
                 </configuration>
             </plugin>
         </plugins>

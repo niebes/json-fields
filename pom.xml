@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.zalando.guild.api</groupId>
-    <artifactId>json-fields</artifactId>
+    <groupId>net.niebes</groupId>
+    <artifactId>jsonfields</artifactId>
     <version>0.5.4-SNAPSHOT</version>
     <modules>
         <module>grammar</module>
-        <module>java</module>
+        <module>core</module>
         <module>jackson</module>
         <module>webmvc</module>
         <module>webflux</module>
@@ -314,18 +314,11 @@
         </plugins>
     </build>
     <scm>
-        <url>https://github.com/zalando/json-fields</url>
-        <connection>scm:git:git://github.com/zalando/json-fields.git</connection>
-        <developerConnection>scm:git:git@github.com:zalando/json-fields.git</developerConnection>
+        <url>https://github.com/niebes/json-fields</url>
+        <connection>scm:git:https://github.com/niebes/json-fields.git</connection>
+        <developerConnection>scm:git:git@github.com:niebes/json-fields.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
-    <contributors>
-        <contributor>
-            <name>Sean Patrick Floyd</name>
-            <email>sean.floyd@zalando.de</email>
-            <organization>Zalando SE - API Guild</organization>
-        </contributor>
-    </contributors>
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
