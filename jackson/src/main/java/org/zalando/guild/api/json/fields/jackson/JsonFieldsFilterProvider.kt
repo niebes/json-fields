@@ -11,17 +11,15 @@ import com.fasterxml.jackson.databind.ser.PropertyWriter
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
-import java.util.LinkedList
+import java.util.*
 import java.util.function.Supplier
 
 class JsonFieldsFilterProvider(
-    predicateSupplier: Supplier<FieldPredicate>
-) : SimpleFilterProvider() {
     private val predicateSupplier: Supplier<FieldPredicate>
+) : SimpleFilterProvider() {
     private val contextStore: ThreadLocal<LinkedList<String>> = ThreadLocal.withInitial { LinkedList() }
 
     init {
-        this.predicateSupplier = requireNotNull(predicateSupplier) { "PredicateProvider required" }
         super.setFailOnUnknownId(false)
     }
 
@@ -41,7 +39,8 @@ class JsonFieldsFilterProvider(
     private inner class FieldPredicatePropertyFilter(private val delegate: PropertyFilter) : PropertyFilter {
         @Throws(Exception::class)
         override fun serializeAsField(
-            pojo: Any, jgen: JsonGenerator, prov: SerializerProvider,
+            pojo: Any, jgen: JsonGenerator,
+            prov: SerializerProvider,
             writer: PropertyWriter
         ) {
             val name = writer.name
@@ -92,7 +91,6 @@ class JsonFieldsFilterProvider(
     companion object {
         @JvmField
         val FILTER_ID: String = FieldPredicatePropertyFilter::class.java.name
-        private const val serialVersionUID = -1263420090088201679L
         private val INCLUDE_ALL: PropertyFilter = object : SimpleBeanPropertyFilter() {
             override fun include(writer: BeanPropertyWriter): Boolean {
                 return true

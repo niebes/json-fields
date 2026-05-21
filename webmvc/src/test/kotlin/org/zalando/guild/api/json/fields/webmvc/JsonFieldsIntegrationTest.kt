@@ -2,15 +2,13 @@ package org.zalando.guild.api.json.fields.webmvc
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment
 import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.boot.test.web.client.getForEntity
 import org.springframework.http.HttpStatus
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -23,7 +21,7 @@ class JsonFieldsIntegrationTest {
 
     private fun get(fields: String? = null): JsonNode {
         val url = if (fields != null) "/api/sample?fields=$fields" else "/api/sample"
-        val response = restTemplate.getForEntity(url, String::class.java)
+        val response = restTemplate.getForEntity<String>(url)
         assertEquals(HttpStatus.OK, response.statusCode)
         return mapper.readTree(response.body)
     }
