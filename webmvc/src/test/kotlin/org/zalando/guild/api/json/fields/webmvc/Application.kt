@@ -1,19 +1,6 @@
 package org.zalando.guild.api.json.fields.webmvc
 
-import jakarta.servlet.Filter
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.context.annotation.Bean
-import org.zalando.guild.api.json.fields.jackson.JsonFieldsModule
 
 @SpringBootApplication
-class Application {
-
-    private val jsonFieldsFilter = JsonFieldsFilter()
-
-    @Bean
-    fun jsonFieldsFilter(): Filter = jsonFieldsFilter
-
-    @Bean
-    fun jsonFieldsModule(): JsonFieldsModule =
-        JsonFieldsModule.createJsonFieldsModule(jsonFieldsFilter)
-}
+class Application
