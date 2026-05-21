@@ -16,7 +16,7 @@
         <antlr4.version>4.13.2</antlr4.version>
         <gpg.sign.skip>false</gpg.sign.skip>
         <slf4j.version>2.0.18</slf4j.version>
-        <kotlin.version>1.9.24</kotlin.version>
+        <kotlin.version>2.1.21</kotlin.version>
     </properties>
     <packaging>pom</packaging>
 
@@ -222,7 +222,7 @@
                     <groupId>org.jetbrains.kotlin</groupId>
                     <version>${kotlin.version}</version>
                     <configuration>
-                        <jvmTarget>11</jvmTarget>
+                        <jvmTarget>17</jvmTarget>
                     </configuration>
                     <executions>
                         <execution>
@@ -240,13 +240,6 @@
                             </goals>
                         </execution>
                     </executions>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.jetbrains.kotlin</groupId>
-                            <artifactId>kotlin-maven-noarg</artifactId>
-                            <version>${kotlin.version}</version>
-                        </dependency>
-                    </dependencies>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -256,8 +249,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>17</source>
+                    <target>17</target>
                 </configuration>
                 <executions>
                     <execution>
@@ -345,10 +338,6 @@
             <organization>Zalando SE - API Guild</organization>
         </contributor>
     </contributors>
-    <ciManagement>
-        <system>Travis CI</system>
-        <url>https://travis-ci.org/zalando/json-fields</url>
-    </ciManagement>
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
