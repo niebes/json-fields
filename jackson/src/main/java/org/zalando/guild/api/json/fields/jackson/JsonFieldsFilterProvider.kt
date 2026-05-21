@@ -11,24 +11,17 @@ import com.fasterxml.jackson.databind.ser.PropertyWriter
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
+import java.util.LinkedList
 import java.util.function.Supplier
 
-/**
- * A FilterProvider that always returns a filter, backed by a supplier of FieldPredicate.
- *
- * @author  Sean Patrick Floyd (sean.floyd@zalando.de)
- * @since   23.09.2015
- */
 class JsonFieldsFilterProvider(
-   predicateSupplier: Supplier<FieldPredicate>,
-   contextProvider: ContextProvider
+    predicateSupplier: Supplier<FieldPredicate>
 ) : SimpleFilterProvider() {
     private val predicateSupplier: Supplier<FieldPredicate>
-    private val contextProvider: ContextProvider
+    private val contextStore: ThreadLocal<LinkedList<String>> = ThreadLocal.withInitial { LinkedList() }
 
     init {
         this.predicateSupplier = requireNotNull(predicateSupplier) { "PredicateProvider required" }
-        this.contextProvider = requireNotNull(contextProvider) { "ContextProvider required" }
         super.setFailOnUnknownId(false)
     }
 
@@ -54,17 +47,17 @@ class JsonFieldsFilterProvider(
             val name = writer.name
             val fieldPredicate = predicateSupplier.get()
             if (fieldPredicate.test(qualifiedPath(name))) {
-                contextProvider.pushContext(name)
+                contextStore.get().addLast(name)
                 try {
                     delegate.serializeAsField(pojo, jgen, prov, writer)
                 } finally {
-                    contextProvider.popContext()
+                    contextStore.get().removeLast()
                 }
             }
         }
 
         private fun qualifiedPath(path: String): List<String> {
-            val context = contextProvider.context
+            val context = contextStore.get()
             val paths: MutableList<String> = ArrayList(context.size + 1)
             paths.addAll(context)
             paths.add(path)
