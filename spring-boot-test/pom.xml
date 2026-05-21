@@ -32,7 +32,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>json-fields-jackson</artifactId>
+            <artifactId>json-fields-webmvc</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -10,6 +10,7 @@
         <module>grammar</module>
         <module>java</module>
         <module>jackson</module>
+        <module>webmvc</module>
         <module>spring-boot-test</module>
         <module>webflux</module>
     </modules>
