@@ -152,10 +152,14 @@
             <artifactId>antlr4-runtime</artifactId>
         </dependency>
 
-        <!-- test dependency -->
+        <!-- test dependencies -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
         </dependency>
 
     </dependencies>

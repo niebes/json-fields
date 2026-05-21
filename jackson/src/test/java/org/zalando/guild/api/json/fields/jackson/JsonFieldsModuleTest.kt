@@ -9,8 +9,8 @@ import com.jayway.jsonassert.JsonAsserter
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.Is.`is`
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates.alwaysFalse
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates.alwaysTrue
@@ -34,7 +34,7 @@ class JsonFieldsModuleTest {
     private var objectMapper: ObjectMapper? = null
     private val outer = Outer()
     private val runs = AtomicInteger()
-    @Before
+    @BeforeEach
     @Throws(Exception::class)
     fun setUp() {
         objectMapper = ObjectMapper()
