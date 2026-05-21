@@ -2,6 +2,7 @@ package org.zalando.guild.api.json.fields.jackson.servlet
 
 import jakarta.servlet.http.HttpServletRequest
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
+import org.zalando.guild.api.json.fields.java.model.FieldPredicates
 import java.util.function.Function
 import java.util.function.Supplier
 
@@ -14,10 +15,14 @@ import java.util.function.Supplier
 class HttpRequestFieldPredicateProvider private constructor(
     private val requestSupplier: Supplier<HttpServletRequest>,
     private val predicateFunction: Function<HttpServletRequest, FieldPredicate>
-) : Supplier<FieldPredicate?> {
+) : Supplier<FieldPredicate> {
 
-    override fun get(): FieldPredicate? {
-        return predicateFunction.apply(requestSupplier.get())
+    override fun get(): FieldPredicate {
+        return try {
+            predicateFunction.apply(requestSupplier.get())
+        } catch (_: Exception) {
+            FieldPredicates.alwaysTrue()
+        }
     }
 
     companion object {
