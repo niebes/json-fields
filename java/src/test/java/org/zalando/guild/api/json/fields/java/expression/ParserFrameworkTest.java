@@ -14,7 +14,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate;
 

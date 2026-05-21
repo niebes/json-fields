@@ -20,7 +20,7 @@ import org.hamcrest.TypeSafeMatcher;
 
 import org.hamcrest.core.IsNot;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author  Sean Patrick Floyd (sean.floyd@zalando.de)

@@ -1,6 +1,6 @@
 package org.zalando.guild.api.json.fields.grammar;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +13,7 @@ import org.antlr.v4.Tool;
 import org.antlr.v4.tool.ANTLRMessage;
 import org.antlr.v4.tool.ANTLRToolListener;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * This test only makes sure the grammar compiles.
