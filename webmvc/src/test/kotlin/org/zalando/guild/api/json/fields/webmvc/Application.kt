@@ -1,10 +1,9 @@
-package org.zalando.guild.api.json.fields.springboot
+package org.zalando.guild.api.json.fields.webmvc
 
 import jakarta.servlet.Filter
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Bean
 import org.zalando.guild.api.json.fields.jackson.JsonFieldsModule
-import org.zalando.guild.api.json.fields.webmvc.JsonFieldsFilter
 
 @SpringBootApplication
 class Application {

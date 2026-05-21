@@ -1,4 +1,4 @@
-package org.zalando.guild.api.json.fields.springboot
+package org.zalando.guild.api.json.fields.webmvc
 
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController

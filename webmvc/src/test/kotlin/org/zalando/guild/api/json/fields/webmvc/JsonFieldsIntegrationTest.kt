@@ -1,4 +1,4 @@
-package org.zalando.guild.api.json.fields.springboot
+package org.zalando.guild.api.json.fields.webmvc
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
