@@ -40,8 +40,7 @@ class JsonFieldsModuleTest {
         objectMapper = ObjectMapper()
         objectMapper!!.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
         val predicateSupplier = Supplier { PREDICATE.get() }
-        val contextProvider: ContextProvider = ThreadLocalContextProvider.instance
-        objectMapper!!.registerModule(JsonFieldsModule.createJsonFieldsModule(predicateSupplier, contextProvider))
+        objectMapper!!.registerModule(JsonFieldsModule.createJsonFieldsModule(predicateSupplier))
     }
 
     internal class Outer {

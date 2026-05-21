@@ -5,8 +5,6 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletRequest
 import jakarta.servlet.ServletResponse
 import jakarta.servlet.http.HttpServletRequest
-import org.zalando.guild.api.json.fields.jackson.ContextProvider
-import org.zalando.guild.api.json.fields.jackson.ThreadLocalContextProvider
 import org.zalando.guild.api.json.fields.java.expression.ParserFramework
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates
@@ -14,15 +12,11 @@ import java.util.function.Supplier
 
 /**
  * A servlet Filter that extracts a fields expression from the request and provides
- * the resulting FieldPredicate. Combines the functionality of ThreadLocalRequestProvider,
- * ParamBasedPredicateFunction, and HttpRequestFieldPredicateProvider into a single class.
- *
- * Register as a servlet filter and pass as the predicateSupplier to
- * [org.zalando.guild.api.json.fields.jackson.JsonFieldsModule.Companion.createJsonFieldsModule].
+ * the resulting FieldPredicate. Register as a servlet filter and pass as the
+ * predicateSupplier to [org.zalando.guild.api.json.fields.jackson.JsonFieldsModule].
  */
 class JsonFieldsFilter(
-    private val paramName: String = DEFAULT_PARAM_NAME,
-    private val contextProvider: ContextProvider = ThreadLocalContextProvider.instance
+    private val paramName: String = DEFAULT_PARAM_NAME
 ) : Filter, Supplier<FieldPredicate> {
 
     private val currentPredicate = ThreadLocal<FieldPredicate>()
@@ -44,15 +38,12 @@ class JsonFieldsFilter(
             chain.doFilter(request, response)
         } finally {
             currentPredicate.remove()
-            contextProvider.clear()
         }
     }
 
     override fun get(): FieldPredicate {
         return currentPredicate.get() ?: FieldPredicates.alwaysTrue()
     }
-
-    fun contextProvider(): ContextProvider = contextProvider
 
     companion object {
         private const val DEFAULT_PARAM_NAME = "fields"
