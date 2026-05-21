@@ -68,6 +68,25 @@ class JsonFieldsIntegrationTest {
     }
 
     @Test
+    fun nestedBlacklist_excludesSpecificNestedField() {
+        val json = get("(id,profile!(age))")
+        assertEquals(1, json["id"].intValue())
+        assertFalse(json.has("name"))
+        assertFalse(json.has("email"))
+        assertNotNull(json["profile"])
+        assertEquals("hello", json["profile"]["bio"].textValue())
+        assertFalse(json["profile"].has("age"))
+    }
+
+    @Test
+    fun nestedBlacklist_parentFieldIsPreserved() {
+        val json = get("(profile!(age))")
+        assertNotNull(json["profile"])
+        assertEquals("hello", json["profile"]["bio"].textValue())
+        assertFalse(json["profile"].has("age"))
+    }
+
+    @Test
     fun blacklistPreservesNestedFields() {
         val json = get("!(name)")
         assertEquals(1, json["id"].intValue())
