@@ -7,7 +7,7 @@ import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.zalando.guild.api.json.fields.grammar.parser.JsonFieldsLexer;
 import org.zalando.guild.api.json.fields.grammar.parser.JsonFieldsParser;
 
@@ -84,7 +84,7 @@ public class JsonFieldsGrammarSyntaxTest {
     }
 
     static Matcher<String> aValidFieldsExpression() {
-        return new TypeSafeDiagnosingMatcher<String>() {
+        return new TypeSafeDiagnosingMatcher<>() {
             @Override
             protected boolean matchesSafely(final String expression, final Description mismatchDescription) {
                 try {

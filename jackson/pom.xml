@@ -46,24 +46,6 @@
                 <groupId>org.jetbrains.kotlin</groupId>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>groovy-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <scriptpath>
-                                <path>${project.basedir}/src/main/gmaven</path>
-                            </scriptpath>
-                            <source>new VersionCreator().create(project, 'org.zalando.guild.api.json.fields.jackson.generated', 'PackageVersion')</source>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <executions>
@@ -98,24 +80,10 @@
             <version>${jackson.version}</version>
         </dependency>
 
-        <!-- optional dependencies -->
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>${servlet.version}</version>
-            <!-- only needed if you use the servlet support -->
-            <optional>true</optional>
-        </dependency>
-
         <!-- test dependencies -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
@@ -146,9 +114,7 @@
 
 
     <properties>
-        <servlet.version>4.0.1</servlet.version>
-        <jackson.version>2.21.0</jackson.version>
-        <kotlin.version>1.9.24</kotlin.version>
+        <jackson.version>2.21.3</jackson.version>
     </properties>
 
 

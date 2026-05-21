@@ -14,7 +14,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate;
 
@@ -64,12 +64,22 @@ public class ParserFrameworkTest {
         assertThat("(foo(bar(baz)))", matchesFields("foo"));
         assertThat("(foo(bar(baz)))", matchesFields("foo", "bar"));
         assertThat("(foo(bar(baz)))", matchesFields("foo", "bar", "baz"));
+        assertThat("(foo!(bar(baz)))", matchesFields("foo"));
         assertThat("(foo!(bar(baz)))", matchesFields("foo", "phleem", "baz"));
         assertThat("(foo!(bar(baz)))", matchesFields("foo", "phleem", "phooey"));
         assertThat("(foo!(bar(baz)))", not(matchesFields("foo", "bar")));
         assertThat("(foo!(bar(baz)))", not(matchesFields("foo", "bar", "baz")));
         assertThat("(foo(bar(baz)))", not(matchesFields("foo", "bar", "phleem")));
         assertThat("(foo(bar(baz)))", not(matchesFields("foo", "phleem")));
+    }
+
+    @Test
+    public void nestedBlacklist() {
+        assertThat("(profile!(age))", matchesFields("profile"));
+        assertThat("(profile!(age))", not(matchesFields("profile", "age")));
+        assertThat("(profile!(age))", matchesFields("profile", "bio"));
+        assertThat("(profile!(age))", matchesFields("profile", "bio", "anything"));
+        assertThat("(profile!(age))", not(matchesFields("other")));
     }
 
     static Matcher<String> matchesFields(final String firstField, final String... moreFields) {
@@ -83,7 +93,7 @@ public class ParserFrameworkTest {
             fields = singletonList(firstField);
         }
 
-        return new TypeSafeMatcher<String>() {
+        return new TypeSafeMatcher<>() {
             @Override
             protected boolean matchesSafely(final String item) {
                 final FieldPredicate fieldPredicate = ParserFramework.parseFieldsExpression(item);

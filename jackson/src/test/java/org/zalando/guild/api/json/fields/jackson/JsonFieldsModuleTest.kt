@@ -9,8 +9,8 @@ import com.jayway.jsonassert.JsonAsserter
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.Is.`is`
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates.alwaysFalse
 import org.zalando.guild.api.json.fields.java.model.FieldPredicates.alwaysTrue
@@ -34,26 +34,29 @@ class JsonFieldsModuleTest {
     private var objectMapper: ObjectMapper? = null
     private val outer = Outer()
     private val runs = AtomicInteger()
-    @Before
+
+    @BeforeEach
     @Throws(Exception::class)
     fun setUp() {
         objectMapper = ObjectMapper()
         objectMapper!!.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
         val predicateSupplier = Supplier { PREDICATE.get() }
-        val contextProvider: ContextProvider = ThreadLocalContextProvider.instance
-        objectMapper!!.registerModule(JsonFieldsModule.createJsonFieldsModule(predicateSupplier, contextProvider))
+        objectMapper!!.registerModule(JsonFieldsModule.createJsonFieldsModule(predicateSupplier))
     }
 
+    @Suppress("unused")
     internal class Outer {
         private val foo = Middle()
         private val foo2 = "FOO2"
     }
 
+    @Suppress("unused")
     internal class Middle {
         private val bar = Inner()
         private val bar2 = 123
     }
 
+    @Suppress("unused")
     internal class Inner {
         private val baz = "BAZ"
         private val phleem = true

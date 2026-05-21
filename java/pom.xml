@@ -9,7 +9,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>json-fields-java</artifactId>
-    <version>0.5.4-SNAPSHOT</version>
 
     <properties>
         <antlr.output.dir>${project.build.directory}/generated-sources/antlr</antlr.output.dir>
@@ -147,27 +146,19 @@
     </build>
 
     <dependencies>
-        <!-- real dependency -->
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
         </dependency>
+
+        <!-- test dependencies -->
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
         </dependency>
-
-
-        <!-- test dependency -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-
-        <!-- optional dependency -->
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
         </dependency>
 
     </dependencies>

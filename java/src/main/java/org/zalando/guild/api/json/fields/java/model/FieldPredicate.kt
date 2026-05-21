@@ -1,7 +1,6 @@
 package org.zalando.guild.api.json.fields.java.model
 
 import java.util.function.Predicate
-import javax.annotation.Nonnull
 
 /**
  * The core abstraction for matching a hierarchy of fields. Based on this, a hierarchy of fields can be tested against a
@@ -25,5 +24,5 @@ interface FieldPredicate : Predicate<List<String>> {
      * @exception  NullPointerException      if the supplied list is `null` or contains `null` values
      * @exception  IllegalArgumentException  if the supplied list is empty
      */
-    override fun test(@Nonnull fieldHierarchy: List<String>): Boolean
+    override fun test(fieldHierarchy: List<String>): Boolean
 }

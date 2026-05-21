@@ -10,26 +10,16 @@ import com.fasterxml.jackson.databind.ser.PropertyFilter
 import com.fasterxml.jackson.databind.ser.PropertyWriter
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
-import com.google.common.base.Preconditions
 import org.zalando.guild.api.json.fields.java.model.FieldPredicate
+import java.util.*
 import java.util.function.Supplier
 
-/**
- * A FilterProvider that always returns a filter, backed by a supplier of FieldPredicate.
- *
- * @author  Sean Patrick Floyd (sean.floyd@zalando.de)
- * @since   23.09.2015
- */
 class JsonFieldsFilterProvider(
-   predicateSupplier: Supplier<FieldPredicate>,
-   contextProvider: ContextProvider
-) : SimpleFilterProvider() {
     private val predicateSupplier: Supplier<FieldPredicate>
-    private val contextProvider: ContextProvider
+) : SimpleFilterProvider() {
+    private val contextStore: ThreadLocal<LinkedList<String>> = ThreadLocal.withInitial { LinkedList() }
 
     init {
-        this.predicateSupplier = Preconditions.checkNotNull(predicateSupplier, "PredicateProvider required")
-        this.contextProvider = Preconditions.checkNotNull(contextProvider, "ContextProvider required")
         super.setFailOnUnknownId(false)
     }
 
@@ -49,23 +39,24 @@ class JsonFieldsFilterProvider(
     private inner class FieldPredicatePropertyFilter(private val delegate: PropertyFilter) : PropertyFilter {
         @Throws(Exception::class)
         override fun serializeAsField(
-            pojo: Any, jgen: JsonGenerator, prov: SerializerProvider,
+            pojo: Any, jgen: JsonGenerator,
+            prov: SerializerProvider,
             writer: PropertyWriter
         ) {
             val name = writer.name
             val fieldPredicate = predicateSupplier.get()
             if (fieldPredicate.test(qualifiedPath(name))) {
-                contextProvider.pushContext(name)
+                contextStore.get().addLast(name)
                 try {
                     delegate.serializeAsField(pojo, jgen, prov, writer)
                 } finally {
-                    contextProvider.popContext()
+                    contextStore.get().removeLast()
                 }
             }
         }
 
         private fun qualifiedPath(path: String): List<String> {
-            val context = contextProvider.context
+            val context = contextStore.get()
             val paths: MutableList<String> = ArrayList(context.size + 1)
             paths.addAll(context)
             paths.add(path)
@@ -100,7 +91,6 @@ class JsonFieldsFilterProvider(
     companion object {
         @JvmField
         val FILTER_ID: String = FieldPredicatePropertyFilter::class.java.name
-        private const val serialVersionUID = -1263420090088201679L
         private val INCLUDE_ALL: PropertyFilter = object : SimpleBeanPropertyFilter() {
             override fun include(writer: BeanPropertyWriter): Boolean {
                 return true

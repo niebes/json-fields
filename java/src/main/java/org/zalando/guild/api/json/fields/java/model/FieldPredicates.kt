@@ -1,7 +1,5 @@
 package org.zalando.guild.api.json.fields.java.model
 
-import javax.annotation.Nonnull
-
 /**
  * Factory methods for constructing [FieldPredicate]s.
  *
@@ -18,7 +16,6 @@ object FieldPredicates {
      * Return a [FieldPredicate] that matches everything.
      */
     @JvmStatic
-    @Nonnull
     fun alwaysTrue(): FieldPredicate {
         return ALWAYS_TRUE
     }
@@ -27,7 +24,6 @@ object FieldPredicates {
      * Return a [FieldPredicate] that matches nothing.
      */
     @JvmStatic
-    @Nonnull
     fun alwaysFalse(): FieldPredicate {
         return ALWAYS_FALSE
     }
@@ -36,7 +32,6 @@ object FieldPredicates {
      * Return a [FieldPredicate] that returns true if all of the supplied [FieldPredicate]s return true.
      */
     @JvmStatic
-    @Nonnull
     fun and(
         first: FieldPredicate,
         vararg more: FieldPredicate
@@ -69,6 +64,16 @@ object FieldPredicates {
         index: Int,
         token: String
     ): FieldPredicate = MatchIndexPredicate(index, token)
+
+    /**
+     * Return a [FieldPredicate] that returns true if the field hierarchy has fewer than
+     * [minDepth] elements. Used to guard nested sub-expressions so that parent fields
+     * are not incorrectly excluded by negation at deeper levels.
+     */
+    @JvmStatic
+    fun depthLessThan(
+        minDepth: Int
+    ): FieldPredicate = DepthLessThanPredicate(minDepth)
 
 
     private class AndPredicate(
@@ -170,6 +175,16 @@ object FieldPredicates {
 
         override fun toString(): String {
             return String.format("match '%s' at index %d", token, index)
+        }
+    }
+
+    private class DepthLessThanPredicate(private val minDepth: Int) : FieldPredicate {
+        override fun test(fieldHierarchy: List<String>): Boolean {
+            return fieldHierarchy.size < minDepth
+        }
+
+        override fun toString(): String {
+            return String.format("depth < %d", minDepth)
         }
     }
 }

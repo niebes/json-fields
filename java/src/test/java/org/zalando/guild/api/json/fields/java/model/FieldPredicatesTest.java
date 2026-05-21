@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.alwaysFalse;
 import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.alwaysTrue;
 import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.and;
+import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.depthLessThan;
 import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.matchIndex;
 import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.not;
 import static org.zalando.guild.api.json.fields.java.model.FieldPredicates.or;
@@ -20,7 +21,7 @@ import org.hamcrest.TypeSafeMatcher;
 
 import org.hamcrest.core.IsNot;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author  Sean Patrick Floyd (sean.floyd@zalando.de)
@@ -35,7 +36,7 @@ public class FieldPredicatesTest {
         final List<String> tokens = new ArrayList<>(tokenArray.length + 1);
         tokens.add(firstToken);
         tokens.addAll(asList(tokenArray));
-        return new TypeSafeMatcher<FieldPredicate>() {
+        return new TypeSafeMatcher<>() {
             @Override
             protected boolean matchesSafely(final FieldPredicate item) {
                 return item.test(tokens);
@@ -53,7 +54,7 @@ public class FieldPredicatesTest {
     }
 
     @Test
-    public void indexBasedMatch() throws Exception {
+    public void indexBasedMatch() {
 
         assertThat(matchIndex(0, "foo"), matchesTokens("foo"));
         assertThat(matchIndex(0, "foo"), matchesTokens("foo", "bar"));
@@ -68,7 +69,7 @@ public class FieldPredicatesTest {
     }
 
     @Test
-    public void conjunction() throws Exception {
+    public void conjunction() {
 
         assertThat(and(True), matchesTokens(ANY_FIELD_NAME));
         assertThat(and(False), doesntMatchTokens(ANY_FIELD_NAME));
@@ -86,7 +87,7 @@ public class FieldPredicatesTest {
     }
 
     @Test
-    public void negation() throws Exception {
+    public void negation() {
 
         assertThat(not(True), doesntMatchTokens(ANY_FIELD_NAME));
         assertThat(not(False), matchesTokens(ANY_FIELD_NAME));
@@ -94,7 +95,16 @@ public class FieldPredicatesTest {
     }
 
     @Test
-    public void disjunction() throws Exception {
+    public void depthGuard() {
+        assertThat(depthLessThan(1), doesntMatchTokens("foo"));
+        assertThat(depthLessThan(2), matchesTokens("foo"));
+        assertThat(depthLessThan(2), doesntMatchTokens("foo", "bar"));
+        assertThat(depthLessThan(3), matchesTokens("foo", "bar"));
+        assertThat(depthLessThan(3), doesntMatchTokens("foo", "bar", "baz"));
+    }
+
+    @Test
+    public void disjunction() {
         assertThat(or(True), matchesTokens(ANY_FIELD_NAME));
         assertThat(or(False), doesntMatchTokens(ANY_FIELD_NAME));
         assertThat(or(True, True), matchesTokens(ANY_FIELD_NAME));
