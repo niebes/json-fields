@@ -315,7 +315,7 @@
     </build>
     <scm>
         <url>https://github.com/niebes/json-fields</url>
-        <connection>scm:git:git://github.com/niebes/json-fields.git</connection>
+        <connection>scm:git:https://github.com/niebes/json-fields.git</connection>
         <developerConnection>scm:git:git@github.com:niebes/json-fields.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
