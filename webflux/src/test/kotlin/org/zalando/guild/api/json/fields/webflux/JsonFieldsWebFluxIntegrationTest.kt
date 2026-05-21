@@ -2,15 +2,13 @@ package org.zalando.guild.api.json.fields.webflux
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.reactive.server.expectBody
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class JsonFieldsWebFluxIntegrationTest {
@@ -25,7 +23,7 @@ class JsonFieldsWebFluxIntegrationTest {
         val body = webTestClient.get().uri(uri)
             .exchange()
             .expectStatus().isOk
-            .expectBody(String::class.java)
+            .expectBody<String>()
             .returnResult()
             .responseBody
         return mapper.readTree(body)

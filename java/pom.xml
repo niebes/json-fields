@@ -9,7 +9,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>json-fields-java</artifactId>
-    <version>0.5.4-SNAPSHOT</version>
 
     <properties>
         <antlr.output.dir>${project.build.directory}/generated-sources/antlr</antlr.output.dir>

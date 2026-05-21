@@ -1,6 +1,5 @@
 package org.zalando.guild.api.json.fields.webmvc
 
-import jakarta.servlet.Filter
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean

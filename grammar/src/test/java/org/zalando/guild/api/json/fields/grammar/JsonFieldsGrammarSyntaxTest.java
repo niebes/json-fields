@@ -84,7 +84,7 @@ public class JsonFieldsGrammarSyntaxTest {
     }
 
     static Matcher<String> aValidFieldsExpression() {
-        return new TypeSafeDiagnosingMatcher<String>() {
+        return new TypeSafeDiagnosingMatcher<>() {
             @Override
             protected boolean matchesSafely(final String expression, final Description mismatchDescription) {
                 try {

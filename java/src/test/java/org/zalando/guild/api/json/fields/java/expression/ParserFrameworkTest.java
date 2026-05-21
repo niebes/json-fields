@@ -93,7 +93,7 @@ public class ParserFrameworkTest {
             fields = singletonList(firstField);
         }
 
-        return new TypeSafeMatcher<String>() {
+        return new TypeSafeMatcher<>() {
             @Override
             protected boolean matchesSafely(final String item) {
                 final FieldPredicate fieldPredicate = ParserFramework.parseFieldsExpression(item);
