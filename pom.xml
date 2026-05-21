@@ -16,6 +16,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <antlr4.version>4.13.2</antlr4.version>
+        <jackson.version>2.21.3</jackson.version>
+        <spring-boot.version>3.4.5</spring-boot.version>
         <gpg.sign.skip>false</gpg.sign.skip>
         <slf4j.version>2.0.18</slf4j.version>
         <kotlin.version>2.1.21</kotlin.version>
@@ -119,11 +121,6 @@
             <version>${kotlin.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib-jdk8</artifactId>
-            <version>${kotlin.version}</version>
-        </dependency>
     </dependencies>
 
 
@@ -192,11 +189,6 @@
                 <plugin>
                     <artifactId>maven-release-plugin</artifactId>
                     <version>3.3.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>com.github.wvengen</groupId>
-                    <artifactId>proguard-maven-plugin</artifactId>
-                    <version>2.7.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>

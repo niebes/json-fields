@@ -10,10 +10,6 @@
 
     <artifactId>json-fields-webmvc</artifactId>
 
-    <properties>
-        <spring-boot.version>3.4.5</spring-boot.version>
-    </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
