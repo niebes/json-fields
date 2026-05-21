@@ -11,6 +11,7 @@
         <module>java</module>
         <module>jackson</module>
         <module>spring-boot-test</module>
+        <module>webflux</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
