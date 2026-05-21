@@ -21,16 +21,16 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.function.Supplier
 
 class JsonFieldsModuleTest {
-    private var objectMapper: ObjectMapper? = null
+    private lateinit var objectMapper: ObjectMapper
     private val outer = Outer()
     private val runs = AtomicInteger()
 
     @BeforeEach
     fun setUp() {
         objectMapper = ObjectMapper()
-        objectMapper!!.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+        objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
         val predicateSupplier = Supplier { PREDICATE.get() }
-        objectMapper!!.registerModule(JsonFieldsModule.createJsonFieldsModule(predicateSupplier))
+        objectMapper.registerModule(JsonFieldsModule.createJsonFieldsModule(predicateSupplier))
     }
 
     @Suppress("unused")
@@ -52,8 +52,8 @@ class JsonFieldsModuleTest {
     }
 
     private fun serialize(obj: Any): JsonNode {
-        val json = objectMapper!!.writeValueAsString(obj)
-        return objectMapper!!.readTree(json)
+        val json = objectMapper.writeValueAsString(obj)
+        return objectMapper.readTree(json)
     }
 
     @Test
