@@ -1,5 +1,6 @@
 package org.zalando.guild.api.json.fields.webflux
 
+import org.slf4j.LoggerFactory
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
@@ -9,18 +10,6 @@ import org.zalando.guild.api.json.fields.java.model.FieldPredicates
 import reactor.core.publisher.Mono
 import java.util.function.Supplier
 
-/**
- * A WebFilter that extracts a fields expression from the request query parameter
- * and makes the resulting FieldPredicate available for Jackson serialization.
- *
- * Stores the predicate in both Reactor Context (for propagation through the
- * reactive chain) and a ThreadLocal (for Jackson serialization which runs
- * synchronously). Uses a ThreadLocalAccessor to bridge Reactor Context to
- * ThreadLocal when context-propagation is enabled.
- *
- * Register as a WebFilter bean and pass as the predicateSupplier to
- * [org.zalando.guild.api.json.fields.jackson.JsonFieldsModule].
- */
 class JsonFieldsWebFilter(
     private val paramName: String = DEFAULT_PARAM_NAME
 ) : WebFilter, Supplier<FieldPredicate> {
@@ -30,7 +19,8 @@ class JsonFieldsWebFilter(
         val predicate = if (fieldsParam != null) {
             try {
                 ParserFramework.parseFieldsExpressionOrFail(fieldsParam)
-            } catch (_: IllegalArgumentException) {
+            } catch (e: IllegalArgumentException) {
+                log.warn("Invalid fields expression '{}': {}", fieldsParam, e.message)
                 FieldPredicates.alwaysFalse()
             }
         } else {
@@ -48,6 +38,7 @@ class JsonFieldsWebFilter(
 
     companion object {
         private const val DEFAULT_PARAM_NAME = "fields"
+        private val log = LoggerFactory.getLogger(JsonFieldsWebFilter::class.java)
         internal const val CONTEXT_KEY = "json-fields-predicate"
         internal val CURRENT_PREDICATE = ThreadLocal<FieldPredicate>()
     }
