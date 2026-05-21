@@ -12,12 +12,8 @@ import org.zalando.guild.api.json.fields.jackson.generated.PackageVersion
  * @author  Sean Patrick Floyd (sean.floyd@zalando.de)
  * @since   24.09.2015
  */
-class JsonFieldsAnnotationIntrospector : AnnotationIntrospector() {
+internal class JsonFieldsAnnotationIntrospector : AnnotationIntrospector() {
     override fun version(): Version = PackageVersion.VERSION
 
     override fun findFilterId(ann: Annotated): Any = JsonFieldsFilterProvider.FILTER_ID
-
-    companion object {
-        private const val serialVersionUID = -8876631291707972177L
-    }
 }
