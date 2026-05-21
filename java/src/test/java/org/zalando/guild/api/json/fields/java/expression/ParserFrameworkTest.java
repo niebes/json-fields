@@ -6,6 +6,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.core.IsNot.not;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,6 +81,13 @@ public class ParserFrameworkTest {
         assertThat("(profile!(age))", matchesFields("profile", "bio"));
         assertThat("(profile!(age))", matchesFields("profile", "bio", "anything"));
         assertThat("(profile!(age))", not(matchesFields("other")));
+    }
+
+    @Test
+    public void caching() {
+        var first = ParserFramework.parseFieldsExpression("(id,name)");
+        var second = ParserFramework.parseFieldsExpression("(id,name)");
+        assertSame(first, second);
     }
 
     static Matcher<String> matchesFields(final String firstField, final String... moreFields) {
