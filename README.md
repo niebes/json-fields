@@ -1,20 +1,68 @@
-JSON fields
--------------
+# JSON Fields
 
-This is a proposed standard extension to Rest APIs that return JSON.
+A library for filtering JSON response fields based on a `fields` query parameter. Supports both Spring WebMVC and Spring WebFlux with Spring Boot auto-configuration.
 
-If and when the request contains a query parameter named "fields" with a blacklist or whitelist of the form
+## Usage
 
-    (field1!(subfield1, subfield2),field2(subfield3, subfield4)
+Add the dependency for your framework:
 
-Then the returned JSON would contain only the fields "field1" and "field2", which in turn would contain the nested
-properties "field2.subfield3", "field2.subfield4", and all fields from "field1" except "subfield1" and "subfield2".
+**Spring WebMVC (Servlet)**
+```xml
+<dependency>
+    <groupId>org.zalando.guild.api</groupId>
+    <artifactId>json-fields-webmvc</artifactId>
+    <version>0.5.4-SNAPSHOT</version>
+</dependency>
+```
 
-The "grammar" sub-project contains the underlying [ANTLR4](http://www.antlr.org/) grammar, other projects may provide
- implementations of the grammar for different languages and environments.
+**Spring WebFlux (Reactive)**
+```xml
+<dependency>
+    <groupId>org.zalando.guild.api</groupId>
+    <artifactId>json-fields-webflux</artifactId>
+    <version>0.5.4-SNAPSHOT</version>
+</dependency>
+```
 
-You can find the grammar at [grammar/src/main/antlr4/JsonFields.g4](grammar/src/main/antlr4/JsonFields.g4)
+Spring Boot auto-configuration registers everything automatically. No `@Bean` declarations needed.
 
-Also check out this Unit Test Class for valid field expressions according to this grammar:
-[JsonFieldsGrammarSyntaxTest.java](grammar/src/test/java/org/zalando/guild/api/json/fields/grammar/JsonFieldsGrammarSyntaxTest.java)
+## Fields Expression Syntax
 
+Whitelist fields:
+```
+GET /api/users?fields=(id,name)
+```
+
+Blacklist fields:
+```
+GET /api/users?fields=!(password,secret)
+```
+
+Nested selection:
+```
+GET /api/users?fields=(id,address(city,country))
+```
+
+Nested blacklist:
+```
+GET /api/users?fields=(id,profile!(internal_notes))
+```
+
+## Modules
+
+| Module | Description |
+|--------|-------------|
+| `json-fields-grammar` | ANTLR4 grammar definition ([JsonFields.g4](grammar/src/main/antlr4/JsonFields.g4)) |
+| `json-fields-java` | Parser and `FieldPredicate` model (framework-agnostic) |
+| `json-fields-jackson` | Jackson `Module` and `FilterProvider` (framework-agnostic) |
+| `json-fields-webmvc` | Servlet filter + Spring Boot auto-configuration |
+| `json-fields-webflux` | WebFilter + Reactor context-propagation + Spring Boot auto-configuration |
+
+## Requirements
+
+- Java 17+
+- Spring Boot 3.2+
+
+## License
+
+[Apache License 2.0](LICENSE)

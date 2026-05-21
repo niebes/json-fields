@@ -1,7 +1,6 @@
 package org.zalando.guild.api.json.fields.java.expression
 
 import org.zalando.guild.api.json.fields.java.expression.ParserFramework.parseFieldsExpression
-import java.util.Arrays
 import kotlin.system.exitProcess
 
 /**
