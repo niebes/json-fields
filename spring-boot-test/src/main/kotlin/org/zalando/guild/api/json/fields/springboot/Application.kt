@@ -1,7 +1,5 @@
 package org.zalando.guild.api.json.fields.springboot
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import jakarta.servlet.Filter
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Bean
@@ -17,9 +15,6 @@ class Application {
     fun jsonFieldsFilter(): Filter = jsonFieldsFilter
 
     @Bean
-    fun objectMapper(): ObjectMapper = ObjectMapper()
-        .registerKotlinModule()
-        .apply {
-            registerModule(JsonFieldsModule.createJsonFieldsModule(jsonFieldsFilter))
-        }
+    fun jsonFieldsModule(): JsonFieldsModule =
+        JsonFieldsModule.createJsonFieldsModule(jsonFieldsFilter)
 }
