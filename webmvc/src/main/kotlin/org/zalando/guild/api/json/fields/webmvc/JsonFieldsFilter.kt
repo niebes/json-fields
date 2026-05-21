@@ -1,4 +1,4 @@
-package org.zalando.guild.api.json.fields.jackson.servlet
+package org.zalando.guild.api.json.fields.webmvc
 
 import jakarta.servlet.Filter
 import jakarta.servlet.FilterChain
