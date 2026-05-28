@@ -80,7 +80,7 @@ class JsonFieldsFilterProvider(
             delegate.depositSchemaProperty(writer, objectVisitor, ctxt)
         }
 
-        override fun snapshot(): PropertyFilter = FieldPredicatePropertyFilter(delegate)
+        override fun snapshot(): PropertyFilter = FieldPredicatePropertyFilter(delegate.snapshot())
     }
 
     companion object {
