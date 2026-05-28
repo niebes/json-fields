@@ -12,7 +12,6 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import net.niebes.jsonfields.jackson.JsonFieldsModule
 import net.niebes.jsonfields.jackson.JsonFieldsProperties
-import tools.jackson.databind.json.JsonMapper
 
 @AutoConfiguration(before = [JacksonAutoConfiguration::class])
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
