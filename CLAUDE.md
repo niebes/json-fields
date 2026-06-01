@@ -69,8 +69,10 @@ Prerequisites: GPG key `927993B7B82F199016055909E7347F989651794C` in your keyrin
 ./mvnw release:prepare -DreleaseVersion=X.Y.Z -DdevelopmentVersion=X.Y.W-SNAPSHOT -B
 
 # 2. Re-tag with meaningful release notes (the plugin generates a generic message)
+#    Verify the two commits: HEAD is "Prepare ...-SNAPSHOT", HEAD~1 is "Release X.Y.Z"
+git log --oneline -2
 git tag -d X.Y.Z
-git tag -a X.Y.Z HEAD~1 -m "Release X.Y.Z
+git tag -a X.Y.Z $(git log --oneline --grep="Release X.Y.Z" -1 --format=%H) -m "Release X.Y.Z
 
 - Added foo
 - Fixed bar"
