@@ -9,6 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>jsonfields-jackson</artifactId>
+    <name>JSON Fields Jackson</name>
 
     <profiles>
         <profile>

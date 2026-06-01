@@ -9,6 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>jsonfields-core</artifactId>
+    <name>JSON Fields Core</name>
 
     <properties>
         <antlr.output.dir>${project.build.directory}/generated-sources/antlr</antlr.output.dir>

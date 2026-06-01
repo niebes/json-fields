@@ -12,6 +12,7 @@
     </properties>
 
     <artifactId>jsonfields-grammar</artifactId>
+    <name>JSON Fields Grammar</name>
     <build>
         <resources>
             <resource>
