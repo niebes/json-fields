@@ -159,6 +159,8 @@
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <projectVersionPolicyId>SemVerVersionPolicy</projectVersionPolicyId>
                         <pushChanges>false</pushChanges>
+                        <scmReleaseCommitComment>Release @{releaseLabel}</scmReleaseCommitComment>
+                        <scmDevelopmentCommitComment>Prepare @{developmentVersion}</scmDevelopmentCommitComment>
                     </configuration>
                 </plugin>
                 <plugin>
