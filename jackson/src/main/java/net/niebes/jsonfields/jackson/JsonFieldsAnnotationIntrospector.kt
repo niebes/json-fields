@@ -1,12 +1,12 @@
 package net.niebes.jsonfields.jackson
 
-import com.fasterxml.jackson.core.Version
-import com.fasterxml.jackson.core.util.VersionUtil
-import com.fasterxml.jackson.databind.AnnotationIntrospector
-import com.fasterxml.jackson.databind.introspect.Annotated
+import tools.jackson.core.Version
+import tools.jackson.databind.AnnotationIntrospector
+import tools.jackson.databind.cfg.MapperConfig
+import tools.jackson.databind.introspect.Annotated
 
 internal class JsonFieldsAnnotationIntrospector : AnnotationIntrospector() {
-    override fun version(): Version = VersionUtil.packageVersionFor(JsonFieldsAnnotationIntrospector::class.java)
+    override fun version(): Version = Version.unknownVersion()
 
-    override fun findFilterId(ann: Annotated): Any = JsonFieldsFilterProvider.FILTER_ID
+    override fun findFilterId(config: MapperConfig<*>, ann: Annotated): Any = JsonFieldsFilterProvider.FILTER_ID
 }

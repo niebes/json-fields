@@ -1,15 +1,13 @@
 package net.niebes.jsonfields.jackson
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.JsonMappingException
-import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor
-import com.fasterxml.jackson.databind.node.ObjectNode
-import com.fasterxml.jackson.databind.ser.BeanPropertyWriter
-import com.fasterxml.jackson.databind.ser.PropertyFilter
-import com.fasterxml.jackson.databind.ser.PropertyWriter
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
+import tools.jackson.core.JsonGenerator
+import tools.jackson.databind.SerializationContext
+import tools.jackson.databind.jsonFormatVisitors.JsonObjectFormatVisitor
+import tools.jackson.databind.ser.BeanPropertyWriter
+import tools.jackson.databind.ser.PropertyFilter
+import tools.jackson.databind.ser.PropertyWriter
+import tools.jackson.databind.ser.std.SimpleBeanPropertyFilter
+import tools.jackson.databind.ser.std.SimpleFilterProvider
 import net.niebes.jsonfields.core.model.FieldPredicate
 import java.util.*
 import java.util.function.Supplier
@@ -31,16 +29,20 @@ class JsonFieldsFilterProvider(
         return false
     }
 
-    override fun findPropertyFilter(filterId: Any, valueToFilter: Any): PropertyFilter {
-        val propertyFilter = super.findPropertyFilter(filterId, valueToFilter)
+    override fun snapshot(): JsonFieldsFilterProvider {
+        return JsonFieldsFilterProvider(predicateSupplier)
+    }
+
+    override fun findPropertyFilter(ctxt: SerializationContext, filterId: Any, valueToFilter: Any): PropertyFilter {
+        val propertyFilter = super.findPropertyFilter(ctxt, filterId, valueToFilter)
         return FieldPredicatePropertyFilter(propertyFilter ?: INCLUDE_ALL)
     }
 
     private inner class FieldPredicatePropertyFilter(private val delegate: PropertyFilter) : PropertyFilter {
         @Throws(Exception::class)
-        override fun serializeAsField(
+        override fun serializeAsProperty(
             pojo: Any, jgen: JsonGenerator,
-            prov: SerializerProvider,
+            ctxt: SerializationContext,
             writer: PropertyWriter
         ) {
             val name = writer.name
@@ -48,7 +50,7 @@ class JsonFieldsFilterProvider(
             if (fieldPredicate.test(qualifiedPath(name))) {
                 contextStore.get().addLast(name)
                 try {
-                    delegate.serializeAsField(pojo, jgen, prov, writer)
+                    delegate.serializeAsProperty(pojo, jgen, ctxt, writer)
                 } finally {
                     contextStore.get().removeLast()
                 }
@@ -66,26 +68,19 @@ class JsonFieldsFilterProvider(
         @Throws(Exception::class)
         override fun serializeAsElement(
             elementValue: Any, jgen: JsonGenerator,
-            prov: SerializerProvider, writer: PropertyWriter
+            ctxt: SerializationContext, writer: PropertyWriter
         ) {
-            delegate.serializeAsElement(elementValue, jgen, prov, writer)
+            delegate.serializeAsElement(elementValue, jgen, ctxt, writer)
         }
 
-        @Throws(JsonMappingException::class)
-        override fun depositSchemaProperty(
-            writer: PropertyWriter, propertiesNode: ObjectNode,
-            provider: SerializerProvider
-        ) {
-            delegate.depositSchemaProperty(writer, propertiesNode, provider)
-        }
-
-        @Throws(JsonMappingException::class)
         override fun depositSchemaProperty(
             writer: PropertyWriter, objectVisitor: JsonObjectFormatVisitor,
-            provider: SerializerProvider
+            ctxt: SerializationContext
         ) {
-            delegate.depositSchemaProperty(writer, objectVisitor, provider)
+            delegate.depositSchemaProperty(writer, objectVisitor, ctxt)
         }
+
+        override fun snapshot(): PropertyFilter = FieldPredicatePropertyFilter(delegate.snapshot())
     }
 
     companion object {

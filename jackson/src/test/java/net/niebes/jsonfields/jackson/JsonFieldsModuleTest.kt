@@ -2,8 +2,9 @@ package net.niebes.jsonfields.jackson
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.PropertyAccessor
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.json.JsonMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -27,10 +28,14 @@ class JsonFieldsModuleTest {
 
     @BeforeEach
     fun setUp() {
-        objectMapper = ObjectMapper()
-        objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
         val predicateSupplier = Supplier { PREDICATE.get() }
-        objectMapper.registerModule(JsonFieldsModule.createJsonFieldsModule(predicateSupplier))
+        objectMapper = JsonMapper.builder()
+            .changeDefaultVisibility { vc ->
+                vc.withVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+            }
+            .addModule(JsonFieldsModule.createJsonFieldsModule())
+            .filterProvider(JsonFieldsModule.createFilterProvider(predicateSupplier))
+            .build()
     }
 
     @Suppress("unused")
